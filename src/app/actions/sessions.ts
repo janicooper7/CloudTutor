@@ -1,0 +1,109 @@
+"use server";
+
+// Server Actions for session mutations. Scoped to the current tutor and
+// revalidate the dashboard subtree so Server Components re-read fresh data.
+
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { db } from "@/db";
+import { sessions, tutors } from "@/db/schema";
+import { currentTutorId } from "@/auth";
+import { getSessionById, getStudentById } from "@/db/queries";
+import { renderLessonReportPDF } from "@/lib/pdf";
+import { sendLessonReportEmail } from "@/lib/email";
+import type { SessionStatus, VocabItem } from "@/lib/mock";
+
+export async function setSessionStatus(id: string, status: SessionStatus): Promise<void> {
+  const tutorId = await currentTutorId();
+  await db
+    .update(sessions)
+    .set({ status })
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function setSessionTitle(id: string, title: string): Promise<void> {
+  const tutorId = await currentTutorId();
+  const trimmed = title.trim();
+  if (!trimmed) return;
+  await db
+    .update(sessions)
+    .set({ title: trimmed })
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  revalidatePath("/dashboard", "layout");
+}
+
+// The editable feedback fields on a session (talkTime + observedLevel are AI
+// output and not tutor-editable, so they're excluded).
+export type SessionFeedbackInput = {
+  vocab: VocabItem[];
+  wentWell: string[];
+  focus: string[];
+  homework: string;
+  additionalInfo: string;
+  nextLesson: string[];
+  lessonEndedAt: string;
+  tutorNotes: string;
+};
+
+/** Persist all edited feedback fields and set the session's status in one write. */
+export async function saveSessionFeedback(
+  id: string,
+  data: SessionFeedbackInput,
+  status: SessionStatus,
+): Promise<void> {
+  const tutorId = await currentTutorId();
+  await db
+    .update(sessions)
+    .set({ ...data, status })
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  revalidatePath("/dashboard", "layout");
+}
+
+/**
+ * Confirm & send: persist the edited feedback, then generate the lesson-report
+ * PDF and email it to the student. Edits are saved as "confirmed" first, so a
+ * delivery failure (missing email, bad key) never leaves the lesson falsely
+ * marked "sent" — the tutor can fix the cause and retry.
+ */
+export async function sendLessonReport(
+  id: string,
+  data: SessionFeedbackInput,
+): Promise<void> {
+  const tutorId = await currentTutorId();
+
+  await db
+    .update(sessions)
+    .set({ ...data, status: "confirmed" })
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+
+  const session = await getSessionById(id);
+  if (!session) throw new Error("Lesson not found.");
+  const student = await getStudentById(session.studentId);
+  if (!student) throw new Error("Student not found.");
+  if (!student.email) {
+    throw new Error(`Add an email address for ${student.name} before sending.`);
+  }
+
+  const [tutor] = await db
+    .select({ name: tutors.name })
+    .from(tutors)
+    .where(eq(tutors.id, tutorId))
+    .limit(1);
+  const tutorName = tutor?.name ?? "Your tutor";
+
+  const pdf = await renderLessonReportPDF(session, student, { tutorName });
+  await sendLessonReportEmail({
+    to: student.email,
+    studentName: student.name,
+    tutorName,
+    session,
+    pdf,
+  });
+
+  await db
+    .update(sessions)
+    .set({ status: "sent" })
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  revalidatePath("/dashboard", "layout");
+}

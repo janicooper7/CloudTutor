@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "CloudTutor Capture",
+  "version": "0.2.0",
+  "description": "Records a 1-on-1 lesson (student = tab audio, tutor = mic) and uploads it to CloudTutor to transcribe and draft automatically.",
+  "permissions": ["tabCapture", "offscreen", "tabs", "activeTab", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CloudTutor Capture"
+  }
+}

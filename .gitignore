@@ -32,9 +32,16 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# drizzle: keep generated migrations, ignore local meta journals if desired
+# (migrations in ./drizzle are committed)
 
 # vercel
 .vercel
+
+# netlify (local dev state + build output)
+.netlify
 
 # typescript
 *.tsbuildinfo

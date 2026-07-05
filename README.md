@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CloudTutor
 
-## Getting Started
+A web app + companion browser extension for 1-on-1 online language tutors. It captures a
+lesson's audio (student = tab audio, tutor = mic), transcribes it, and uses Claude to generate
+editable feedback — a student report (emailed as a PDF) and private teaching notes — plus a
+per-student learning journey that improves suggestions over time.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + React 19, Tailwind v4
+- **Neon** Postgres + **Drizzle ORM**
+- **NextAuth v5** (Google sign-in)
+- **Claude** (`@anthropic-ai/sdk`) for feedback, **Deepgram** for speech-to-text
+- **Resend** + `pdf-lib` for the emailed lesson PDF
+- **Netlify** hosting — lesson audio is chunk-uploaded to Netlify Blobs and processed by a
+  background function (see below)
+
+## Local development
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in the values (see the file's comments)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To exercise the full record → draft pipeline locally you need **Netlify Blobs**, which only
+exists under the Netlify CLI:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npx netlify dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Database migrations (Drizzle): `npm run db:generate` / `db:migrate` / `db:push` / `db:studio`.
 
-## Learn More
+## Deploying to Netlify
 
-To learn more about Next.js, take a look at the following resources:
+Because a full lesson's audio far exceeds Netlify's 6 MB request limit and 26–60 s function
+timeout, the two audio tracks are sliced into ~4 MB chunks, uploaded to Netlify Blobs via
+`/api/upload/*`, and transcribed + drafted by the 15-minute background function in
+`netlify/functions/process.mts`, which then deletes the audio.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Connect the repo in Netlify and set the environment variables listed in the **Deploying to
+Netlify** section of [`.env.example`](./.env.example) (all the app keys plus `INTERNAL_TASK_SECRET`
+and `AUTH_TRUST_HOST=true`), then add `https://<your-site>.netlify.app/api/auth/callback/google`
+to your Google OAuth client's authorized redirect URIs.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Browser extension
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `extension/` folder is an unpacked Chrome (Manifest V3) extension. Load it via
+`chrome://extensions` → Developer mode → Load unpacked, then set its app URL and capture token
+from the dashboard's **Settings → Lesson capture**.

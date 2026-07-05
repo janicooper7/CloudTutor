@@ -1,0 +1,23 @@
+# Netlify deployment config for CloudTutor (Next.js 16 app + one background function).
+#
+# The heavy audio pipeline can't run inside a normal serverless request (6 MB body
+# limit, 26–60 s timeout), so lesson audio is chunk-uploaded to Netlify Blobs and
+# processed by the background function in netlify/functions/process.mts (15 min limit).
+# See PLAN/deploy notes in .env.example.
+
+[build]
+  command = "next build"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Auth.js v5 refuses to infer the host behind a proxy unless we opt in. Without
+  # this, Google sign-in redirects break on the *.netlify.app domain.
+  AUTH_TRUST_HOST = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  # esbuild bundles our src/ imports into the background function and resolves the
+  # "@/*" tsconfig path alias.
+  node_bundler = "esbuild"

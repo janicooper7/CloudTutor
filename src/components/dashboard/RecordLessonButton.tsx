@@ -1,0 +1,197 @@
+"use client";
+
+// Global "Record a lesson" button for the sidebar. Because it isn't tied to a
+// student, it first prompts which student the lesson is for, then drives the
+// shared recorder hook. Recording/processing shows a modal overlay so the tutor
+// keeps control from anywhere in the dashboard.
+
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
+import Avatar from "./Avatar";
+import { SearchIcon } from "./icons";
+import { useSessionRecorder, formatElapsed } from "./useSessionRecorder";
+
+type PickStudent = { id: string; name: string; initial: string };
+
+export default function RecordLessonButton({ students }: { students: PickStudent[] }) {
+  const { status, elapsed, error, start, stop, reset } = useSessionRecorder();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [chosen, setChosen] = useState<PickStudent | null>(null);
+  const [query, setQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  // The overlay is portaled to <body> so it centres on the whole viewport — the
+  // sidebar's `backdrop-blur` would otherwise trap a `fixed` child inside it.
+  useEffect(() => setMounted(true), []);
+
+  const open = pickerOpen || status !== "idle";
+  const firstName = chosen?.name.split(" ")[0] ?? "the student";
+
+  const showSearch = students.length > 3;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return students;
+    return students.filter((s) => s.name.toLowerCase().includes(q));
+  }, [students, query]);
+
+  function pick(s: PickStudent) {
+    setChosen(s);
+    setPickerOpen(false); // hand off to the recording overlay (driven by status)
+    setQuery("");
+    void start(s.id);
+  }
+
+  function closeIdle() {
+    setPickerOpen(false);
+    setChosen(null);
+    setQuery("");
+    reset();
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setPickerOpen(true)}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-deep px-4 py-3 font-semibold text-white shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5"
+      >
+        <RecDot /> Record a lesson
+      </button>
+
+      {open && mounted && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-7 shadow-soft-md">
+            {status === "idle" && (
+              <>
+                <div className="mb-1 font-display text-lg font-medium text-ink">
+                  Record a lesson
+                </div>
+                <p className="mb-4 text-sm text-ink-soft">Who is this lesson with?</p>
+
+                {students.length === 0 ? (
+                  <div className="rounded-xl border border-line bg-white/60 p-4 text-sm text-ink-soft">
+                    Add a student first, then you can record their lessons.
+                    <Link
+                      href="/dashboard/students/new"
+                      onClick={closeIdle}
+                      className="mt-3 block rounded-lg bg-brand-deep px-4 py-2 text-center font-semibold text-white"
+                    >
+                      Add a student
+                    </Link>
+                  </div>
+                ) : (
+                  <>
+                    {showSearch && (
+                      <div className="relative mb-2">
+                        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                        <input
+                          autoFocus
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          placeholder="Search students…"
+                          className="w-full rounded-xl border border-line bg-white/60 py-2 pl-10 pr-3 text-sm text-ink outline-none transition-colors duration-200 placeholder:text-muted focus:border-brand-line"
+                        />
+                      </div>
+                    )}
+                    {filtered.length === 0 ? (
+                      <div className="px-3 py-8 text-center text-sm text-muted">
+                        No students match “{query.trim()}”.
+                      </div>
+                    ) : (
+                      <div className="-mr-1 max-h-[11.25rem] space-y-1 overflow-y-auto pr-1">
+                        {filtered.map((s) => (
+                          <button
+                            key={s.id}
+                            onClick={() => pick(s)}
+                            className="flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-left transition-colors hover:border-brand-line hover:bg-brand-soft/50"
+                          >
+                            <Avatar initial={s.initial} size={36} />
+                            <span className="font-semibold text-ink">{s.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                <button
+                  onClick={closeIdle}
+                  className="mt-4 w-full rounded-lg border border-line px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:text-ink"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+
+            {status === "recording" && (
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex items-center justify-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e0605f] opacity-70" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#e0605f]" />
+                  </span>
+                  <span className="font-semibold text-ink">Recording {firstName}’s lesson</span>
+                </div>
+                <div className="mb-1 font-mono text-3xl font-semibold tabular-nums text-ink">
+                  {formatElapsed(elapsed)}
+                </div>
+                <p className="mb-5 text-xs text-ink-soft">
+                  Keep your lesson tab open and shared. Stop when the lesson ends.
+                </p>
+                <button
+                  onClick={stop}
+                  className="w-full rounded-xl bg-[#e0605f] px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
+                  style={{ boxShadow: "0 10px 24px -10px rgba(224,96,95,.7)" }}
+                >
+                  ■ Stop &amp; file lesson
+                </button>
+              </div>
+            )}
+
+            {status === "processing" && (
+              <div className="flex flex-col items-center py-4 text-center">
+                <Spinner />
+                <div className="mt-3 font-semibold text-ink">Transcribing &amp; drafting {firstName}’s lesson…</div>
+                <p className="mt-1 text-xs text-ink-soft">
+                  Separating the two voices and writing the feedback — a few seconds.
+                </p>
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="text-center">
+                <div className="mb-1 font-semibold text-[#c0524e]">Recording didn’t go through</div>
+                <p className="mb-5 text-sm text-ink-soft">{error}</p>
+                <button
+                  onClick={closeIdle}
+                  className="w-full rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+function RecDot() {
+  return (
+    <span className="relative flex h-2.5 w-2.5">
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
+      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+    </span>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg className="h-7 w-7 animate-spin text-brand-deep" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z" />
+    </svg>
+  );
+}
