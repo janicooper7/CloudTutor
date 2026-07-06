@@ -18,7 +18,9 @@
 
 import type { Config } from "@netlify/functions";
 import { transcribeLesson } from "@/lib/stt";
-import { createDraftLessonCore } from "@/lib/lessons";
+// Import the Next-free core directly (NOT @/lib/lessons) so this bundle never
+// pulls in `next/cache`, which isn't resolvable in a standalone function.
+import { createDraftLessonCore } from "@/lib/lessons-core";
 import {
   uploadStore,
   chunkKey,
