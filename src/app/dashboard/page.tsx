@@ -27,6 +27,9 @@ export default async function DashboardHome() {
 
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
   const activeCount = students.filter((s) => s.active !== false).length;
+  // Only drafts still "need review" — a confirmed lesson has been reviewed and
+  // is just awaiting send, so it stays in the list but isn't counted as a draft.
+  const draftCount = pending.filter((s) => s.status === "draft").length;
 
   // Real lessons-per-week from session dates, plus a week-over-week trend.
   const thisWeekStart = startOfWeek(new Date());
@@ -47,7 +50,7 @@ export default async function DashboardHome() {
   const stats: { label: string; value: string; delta: string; tone: StatTone }[] = [
     { label: "Active students", value: String(activeCount), delta: "on your roster", tone: "muted" },
     { label: "Lessons this week", value: String(thisWeek), delta: weekDelta, tone: weekTone },
-    { label: "Drafts to review", value: String(pending.length), delta: "Awaiting you", tone: "muted" },
+    { label: "Drafts to review", value: String(draftCount), delta: "Awaiting you", tone: "muted" },
   ];
 
   return (
@@ -85,7 +88,7 @@ export default async function DashboardHome() {
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-display text-xl font-medium text-ink">Awaiting your review</h2>
               <span className="rounded-full bg-amber/15 px-2.5 py-1 text-xs font-semibold text-[#b5791f]">
-                {pending.length} {pending.length === 1 ? "draft" : "drafts"}
+                {draftCount} {draftCount === 1 ? "draft" : "drafts"}
               </span>
             </div>
 

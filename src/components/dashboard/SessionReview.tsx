@@ -28,11 +28,14 @@ export default function SessionReview({
   const [flashTone, setFlashTone] = useState<"ok" | "err">("ok");
   const [status, setStatus] = useState<SessionStatus>(session.status);
   const [saving, setSaving] = useState(false);
+  // Which action is in flight, so each button shows its own progress label.
+  const [pending, setPending] = useState<null | SessionStatus>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const title = session.title;
   const sent = status === "sent";
+  const confirmed = status === "confirmed";
   const missingEmail = !student?.email;
 
   function flash(msg: string, tone: "ok" | "err" = "ok") {
@@ -54,6 +57,7 @@ export default function SessionReview({
 
   async function save(target: SessionStatus) {
     setSaving(true);
+    setPending(target);
     try {
       if (target === "sent") {
         const result = await sendLessonReport(session.id, feedback());
@@ -68,6 +72,8 @@ export default function SessionReview({
       if (target === "sent") {
         flash(`Feedback PDF sent to ${session.studentName.split(" ")[0]}.`);
         if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (target === "confirmed") {
+        flash("Lesson confirmed — ready to send.");
       } else {
         flash("Draft saved.");
       }
@@ -79,6 +85,7 @@ export default function SessionReview({
       );
     } finally {
       setSaving(false);
+      setPending(null);
     }
   }
 
@@ -150,9 +157,6 @@ export default function SessionReview({
             <InfoRow k="Native language" v={student.native} />
             <InfoRow k="Working level" v={student.level} />
             {student.targetExam && <InfoRow k="Target exam" v={student.targetExam} />}
-            {student.focus.length > 0 && (
-              <InfoRow k="Focus areas" v={student.focus.join(" · ")} />
-            )}
           </dl>
         ) : (
           <p className="text-sm text-muted">No student profile linked.</p>
@@ -236,6 +240,21 @@ export default function SessionReview({
             <div className="font-display text-lg font-medium text-ink">Tutor notes</div>
           </div>
           <div className="flex flex-col gap-6 p-6">
+            {student && student.focus.length > 0 && (
+              <div>
+                <SectionLabel>Focus areas</SectionLabel>
+                <ul className="flex flex-col gap-2">
+                  {student.focus.map((f, i) => (
+                    <li
+                      key={i}
+                      className="rounded-xl border border-mint/30 bg-mint/5 px-3.5 py-2.5 text-sm text-ink-soft"
+                    >
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div>
               <SectionLabel>Where the lesson ended</SectionLabel>
               <textarea
@@ -321,21 +340,29 @@ export default function SessionReview({
         >
           {saved}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-3">
           <button
-            onClick={() => save("confirmed")}
+            onClick={() => save("draft")}
             disabled={sent || saving}
             className="rounded-xl border border-brand-line bg-white/70 px-5 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-brand disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Save draft
+            {pending === "draft" ? "Saving…" : "Save draft"}
+          </button>
+          <button
+            onClick={() => save("confirmed")}
+            disabled={sent || saving || confirmed}
+            className="inline-flex items-center gap-2 rounded-xl border border-brand-deep bg-brand-soft px-5 py-3 font-semibold text-brand-deep transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {confirmed || sent ? "Confirmed ✓" : pending === "confirmed" ? "Confirming…" : "Confirm lesson"}
           </button>
           <button
             onClick={() => save("sent")}
-            disabled={sent || saving || missingEmail}
+            disabled={sent || saving || missingEmail || !confirmed}
+            title={!confirmed && !sent ? "Confirm the lesson before sending." : undefined}
             className="inline-flex items-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
             style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
           >
-            {sent ? "Sent ✓" : saving ? "Sending…" : "Confirm & send to student →"}
+            {sent ? "Sent ✓" : pending === "sent" ? "Sending…" : "Send to student →"}
           </button>
         </div>
       </div>

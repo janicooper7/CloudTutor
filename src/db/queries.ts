@@ -33,6 +33,37 @@ function toStudent(r: DbStudent): Student {
   };
 }
 
+/**
+ * Overlay a student's live stats, derived from their lessons, on top of the
+ * stored profile row. Only "taught" lessons (confirmed or sent) count — a draft
+ * is still in review. Deriving on read keeps the roster, vocab bank, and
+ * "areas to improve" correct without denormalized columns drifting out of sync.
+ */
+function withDerivedStats(base: Student, studentSessions: DbSession[]): Student {
+  const taught = studentSessions
+    .filter((s) => s.status === "confirmed" || s.status === "sent")
+    .sort((a, b) => b.isoDate.localeCompare(a.isoDate));
+
+  const vocab = new Set<string>();
+  for (const s of taught) {
+    for (const v of s.vocab) {
+      const term = v.term?.trim();
+      if (term) vocab.add(term.toLowerCase());
+    }
+  }
+
+  const latest = taught[0];
+  return {
+    ...base,
+    lessonCount: taught.length,
+    vocabCount: vocab.size,
+    // Fall back to the stored values before any lesson has been taught, so a
+    // brand-new student keeps their "New" marker and profile focus areas.
+    lastSeen: latest ? latest.date : base.lastSeen,
+    focus: latest ? latest.focus : base.focus,
+  };
+}
+
 function toSession(r: DbSession): Session {
   return {
     id: r.id,
@@ -61,12 +92,19 @@ function toSession(r: DbSession): Session {
 
 export async function getStudents(): Promise<Student[]> {
   const tutorId = await currentTutorId();
-  const rows = await db
-    .select()
-    .from(students)
-    .where(eq(students.tutorId, tutorId))
-    .orderBy(students.createdAt);
-  return rows.map(toStudent);
+  const [studentRows, sessionRows] = await Promise.all([
+    db.select().from(students).where(eq(students.tutorId, tutorId)).orderBy(students.createdAt),
+    db.select().from(sessions).where(eq(sessions.tutorId, tutorId)),
+  ]);
+
+  const byStudent = new Map<string, DbSession[]>();
+  for (const s of sessionRows) {
+    const list = byStudent.get(s.studentId);
+    if (list) list.push(s);
+    else byStudent.set(s.studentId, [s]);
+  }
+
+  return studentRows.map((r) => withDerivedStats(toStudent(r), byStudent.get(r.id) ?? []));
 }
 
 export async function getStudentById(id: string): Promise<Student | undefined> {
@@ -76,7 +114,13 @@ export async function getStudentById(id: string): Promise<Student | undefined> {
     .from(students)
     .where(and(eq(students.tutorId, tutorId), eq(students.id, id)))
     .limit(1);
-  return row ? toStudent(row) : undefined;
+  if (!row) return undefined;
+
+  const studentSessions = await db
+    .select()
+    .from(sessions)
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.studentId, id)));
+  return withDerivedStats(toStudent(row), studentSessions);
 }
 
 export async function getSessions(): Promise<Session[]> {
