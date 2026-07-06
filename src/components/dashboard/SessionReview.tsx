@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Avatar from "./Avatar";
 import StatusBadge from "./StatusBadge";
 import type { Session, SessionStatus, Student, VocabItem } from "@/lib/mock";
-import { saveSessionFeedback, sendLessonReport } from "@/app/actions/sessions";
+import { deleteSession, saveSessionFeedback, sendLessonReport } from "@/app/actions/sessions";
 
 export default function SessionReview({
   session,
@@ -28,6 +28,8 @@ export default function SessionReview({
   const [flashTone, setFlashTone] = useState<"ok" | "err">("ok");
   const [status, setStatus] = useState<SessionStatus>(session.status);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const title = session.title;
   const sent = status === "sent";
@@ -77,6 +79,22 @@ export default function SessionReview({
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function remove() {
+    setDeleting(true);
+    try {
+      // deleteSession redirects to /dashboard on success, so control won't
+      // return here in the happy path.
+      await deleteSession(session.id);
+    } catch (err) {
+      flash(
+        err instanceof Error && err.message ? err.message : "Couldn't delete — please try again.",
+        "err",
+      );
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   }
 
@@ -267,8 +285,37 @@ export default function SessionReview({
       )}
 
       <div className="sticky bottom-4 mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-surface/90 p-4 shadow-soft-md backdrop-blur">
+        <div className="flex items-center gap-3">
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-[#d9534f]">Delete this lesson?</span>
+              <button
+                onClick={remove}
+                disabled={deleting}
+                className="rounded-lg bg-[#d9534f] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#c33] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {deleting ? "Deleting…" : "Yes, delete"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={deleting}
+                className="rounded-lg border border-line px-3.5 py-2 text-sm font-semibold text-ink transition-colors hover:bg-white disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              disabled={saving}
+              className="rounded-xl border border-line px-4 py-3 font-semibold text-muted transition-colors hover:border-[#e77] hover:text-[#d9534f] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Delete
+            </button>
+          )}
+        </div>
         <div
-          className={`min-h-[1.25rem] text-sm font-medium ${
+          className={`min-h-[1.25rem] flex-1 text-right text-sm font-medium ${
             flashTone === "err" ? "text-[#d9534f]" : "text-mint"
           }`}
         >

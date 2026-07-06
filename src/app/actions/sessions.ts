@@ -5,6 +5,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { sessions, tutors } from "@/db/schema";
 import { currentTutorId } from "@/auth";
@@ -31,6 +32,20 @@ export async function setSessionTitle(id: string, title: string): Promise<void> 
     .set({ title: trimmed })
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
   revalidatePath("/dashboard", "layout");
+}
+
+/**
+ * Permanently delete a session (e.g. a bad recording the tutor doesn't want to
+ * keep). Scoped to the current tutor so one tutor can't delete another's rows,
+ * then redirects back to the dashboard since the review page no longer exists.
+ */
+export async function deleteSession(id: string): Promise<void> {
+  const tutorId = await currentTutorId();
+  await db
+    .delete(sessions)
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard");
 }
 
 // The editable feedback fields on a session (talkTime + observedLevel are AI

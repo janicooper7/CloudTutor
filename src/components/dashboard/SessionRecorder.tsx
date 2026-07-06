@@ -33,7 +33,7 @@ export default function SessionRecorder({
             className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
             style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
           >
-            <MicIcon /> Record this session
+            <MicIcon /> Record a session
           </button>
         </div>
       )}
