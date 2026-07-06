@@ -184,7 +184,7 @@ async function build(
   // ---- Lesson snapshot ----
   sectionLabel("Lesson snapshot");
   text(
-    `Level observed this lesson: ${session.observedLevel}    ·    Speaking time: you ${session.talkTime.student}% / tutor ${session.talkTime.tutor}%`,
+    `Speaking time: you ${session.talkTime.student}% / tutor ${session.talkTime.tutor}%`,
     { color: C.inkSoft, size: 10.5 },
   );
 

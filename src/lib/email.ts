@@ -44,9 +44,6 @@ export async function sendLessonReportEmail(args: {
           Here are your notes from today's lesson. Your full report — new vocabulary,
           what went well, and areas to work on — is attached as a PDF.
         </p>
-        <p style="margin:0 0 4px;color:#3f4750;">
-          <strong style="color:#123a6b;">Level this lesson:</strong> ${escapeHtml(session.observedLevel)}
-        </p>
         ${homeworkBlock}
         <p style="margin:20px 0 0;color:#3f4750;">See you next time,<br/>${escapeHtml(tutorName)}</p>
       </div>
