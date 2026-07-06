@@ -13,6 +13,14 @@ import { uploadLessonAudio } from "@/lib/upload-client";
 
 export type RecorderStatus = "idle" | "recording" | "processing" | "error";
 
+// Flush a data chunk every 5s. Without a timeslice, MediaRecorder buffers the
+// whole lesson into a single WebM blob with no duration/periodic-cluster
+// metadata, and Deepgram's pre-recorded API only transcribes the first portion
+// of such a file (~10 min) — silently truncating long lessons. Periodic chunks
+// produce a well-formed, fully-transcribable stream. The chunks are concatenated
+// back into one blob on stop.
+const TIMESLICE_MS = 5000;
+
 export function useSessionRecorder() {
   const router = useRouter();
 
@@ -90,7 +98,7 @@ export function useSessionRecorder() {
         makeRecorder(studentStream, "student"),
         makeRecorder(mic, "tutor"),
       ];
-      recorders.current.forEach((r) => r.start());
+      recorders.current.forEach((r) => r.start(TIMESLICE_MS));
 
       startedAt.current = Date.now();
       setElapsed(0);

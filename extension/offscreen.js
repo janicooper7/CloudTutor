@@ -165,8 +165,11 @@ async function start(streamId) {
     const micRec = recordStream(micStream, "tutor");
     recorders = [tabRec, micRec];
     pending = 2;
-    tabRec.start();
-    micRec.start();
+    // Flush a chunk every 5s. Without a timeslice, MediaRecorder emits one big
+    // WebM blob at stop with no duration/periodic-cluster metadata, and Deepgram
+    // only transcribes its first portion (~10 min) — truncating long lessons.
+    tabRec.start(5000);
+    micRec.start(5000);
   } catch (err) {
     started = false;
     chrome.runtime.sendMessage({
