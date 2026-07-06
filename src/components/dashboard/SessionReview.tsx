@@ -54,7 +54,11 @@ export default function SessionReview({
     setSaving(true);
     try {
       if (target === "sent") {
-        await sendLessonReport(session.id, feedback());
+        const result = await sendLessonReport(session.id, feedback());
+        if (!result.ok) {
+          flash(result.error, "err");
+          return;
+        }
       } else {
         await saveSessionFeedback(session.id, feedback(), target);
       }

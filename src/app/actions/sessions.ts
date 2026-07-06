@@ -66,10 +66,12 @@ export async function saveSessionFeedback(
  * delivery failure (missing email, bad key) never leaves the lesson falsely
  * marked "sent" — the tutor can fix the cause and retry.
  */
+export type SendLessonReportResult = { ok: true } | { ok: false; error: string };
+
 export async function sendLessonReport(
   id: string,
   data: SessionFeedbackInput,
-): Promise<void> {
+): Promise<SendLessonReportResult> {
   const tutorId = await currentTutorId();
 
   await db
@@ -77,33 +79,46 @@ export async function sendLessonReport(
     .set({ ...data, status: "confirmed" })
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
 
-  const session = await getSessionById(id);
-  if (!session) throw new Error("Lesson not found.");
-  const student = await getStudentById(session.studentId);
-  if (!student) throw new Error("Student not found.");
-  if (!student.email) {
-    throw new Error(`Add an email address for ${student.name} before sending.`);
+  try {
+    const session = await getSessionById(id);
+    if (!session) throw new Error("Lesson not found.");
+    const student = await getStudentById(session.studentId);
+    if (!student) throw new Error("Student not found.");
+    if (!student.email) {
+      throw new Error(`Add an email address for ${student.name} before sending.`);
+    }
+
+    const [tutor] = await db
+      .select({ name: tutors.name })
+      .from(tutors)
+      .where(eq(tutors.id, tutorId))
+      .limit(1);
+    const tutorName = tutor?.name ?? "Your tutor";
+
+    const pdf = await renderLessonReportPDF(session, student, { tutorName });
+    await sendLessonReportEmail({
+      to: student.email,
+      studentName: student.name,
+      tutorName,
+      session,
+      pdf,
+    });
+
+    await db
+      .update(sessions)
+      .set({ status: "sent" })
+      .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+    revalidatePath("/dashboard", "layout");
+    return { ok: true };
+  } catch (err) {
+    // Return the real reason instead of throwing: Next.js sanitizes thrown
+    // server-action messages in production to a generic 500, hiding exactly the
+    // detail the tutor needs ("add an email", "verify a domain", etc.). The row
+    // stays "confirmed" (saved but not sent), so the tutor can fix it and retry.
+    revalidatePath("/dashboard", "layout");
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Couldn't send the report.",
+    };
   }
-
-  const [tutor] = await db
-    .select({ name: tutors.name })
-    .from(tutors)
-    .where(eq(tutors.id, tutorId))
-    .limit(1);
-  const tutorName = tutor?.name ?? "Your tutor";
-
-  const pdf = await renderLessonReportPDF(session, student, { tutorName });
-  await sendLessonReportEmail({
-    to: student.email,
-    studentName: student.name,
-    tutorName,
-    session,
-    pdf,
-  });
-
-  await db
-    .update(sessions)
-    .set({ status: "sent" })
-    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
-  revalidatePath("/dashboard", "layout");
 }
