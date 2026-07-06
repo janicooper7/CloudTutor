@@ -17,7 +17,6 @@
 // and the function never throws.
 
 import type { Config } from "@netlify/functions";
-import { env } from "@/lib/env";
 import { transcribeLesson } from "@/lib/stt";
 import { createDraftLessonCore } from "@/lib/lessons";
 import {
@@ -58,34 +57,60 @@ async function readTrack(
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  if (req.headers.get("x-internal-secret") !== env.INTERNAL_TASK_SECRET) {
+  // Read the secret directly (not via env.required) so a missing env var is a
+  // logged 500, not an uncaught throw before our try/catch.
+  const secret = process.env.INTERNAL_TASK_SECRET;
+  if (!secret) {
+    console.error("[process] INTERNAL_TASK_SECRET is not set in the environment.");
+    return new Response("Server misconfigured", { status: 500 });
+  }
+  if (req.headers.get("x-internal-secret") !== secret) {
+    console.warn("[process] rejected: bad or missing x-internal-secret header.");
     return new Response("Forbidden", { status: 403 });
   }
 
   let uploadId = "";
-  const store = uploadStore();
+  // store is created inside the try so a Blobs failure is caught + logged, not an
+  // uncaught crash (a background function has already returned 202 by then).
+  let store: ReturnType<typeof uploadStore> | undefined;
 
   try {
     ({ uploadId } = (await req.json()) as { uploadId: string });
+    console.log(`[process] start uploadId=${uploadId}`);
     if (!uploadId) return new Response("Missing uploadId", { status: 400 });
+
+    store = uploadStore();
+    console.log("[process] blob store ready");
 
     const job = (await store.get(jobKey(uploadId), {
       type: "json",
       consistency: "strong",
     })) as UploadJob | null;
-    if (!job) return new Response("Unknown job", { status: 404 });
+    if (!job) {
+      console.error(`[process] job blob not found for ${uploadId}`);
+      return new Response("Unknown job", { status: 404 });
+    }
+    console.log(
+      `[process] job loaded student=${job.studentId} parts=${job.parts.student}/${job.parts.tutor}`,
+    );
 
     const [studentAudio, tutorAudio] = await Promise.all([
       readTrack(store, uploadId, "student", job.parts.student),
       readTrack(store, uploadId, "tutor", job.parts.tutor),
     ]);
+    console.log(
+      `[process] audio assembled student=${studentAudio.length}B tutor=${tutorAudio.length}B — calling Deepgram`,
+    );
 
     const transcript = await transcribeLesson({ studentAudio, tutorAudio });
+    console.log(`[process] transcript ready (${transcript.length} chars) — calling Claude`);
+
     const { id } = await createDraftLessonCore(job.tutorId, {
       studentId: job.studentId,
       transcript,
       durationMin: job.durationMin,
     });
+    console.log(`[process] draft created lesson=${id}`);
 
     await store.setJSON(statusKey(uploadId), {
       state: "done",
@@ -94,14 +119,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Drop the audio; keep the tiny job + status blobs for the client's poll.
     await Promise.all(
-      allChunkKeys(uploadId, job.parts).map((key) => store.delete(key)),
+      allChunkKeys(uploadId, job.parts).map((key) => store!.delete(key)),
     );
+    console.log(`[process] complete uploadId=${uploadId}`);
   } catch (err) {
     const error = err instanceof Error ? err.message : "Processing failed.";
-    if (uploadId) {
+    console.error(`[process] FAILED uploadId=${uploadId}:`, err);
+    if (store && uploadId) {
       await store
         .setJSON(statusKey(uploadId), { state: "error", error } satisfies UploadStatus)
-        .catch(() => {});
+        .catch((e) => console.error("[process] could not write error status:", e));
     }
   }
 
