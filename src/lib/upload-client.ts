@@ -12,8 +12,43 @@ const CHUNK_SIZE = 4 * 1024 * 1024; // 4 MB — comfortably under the 6 MB limit
 const UPLOAD_CONCURRENCY = 4;
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 15 * 60 * 1000; // background function's own ceiling.
+const MAX_ATTEMPTS = 5; // per request, incl. the first try.
+const RETRY_BASE_MS = 600; // exponential backoff base.
 
 type Track = "student" | "tutor";
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * fetch with bounded exponential-backoff retries. A long lesson uploads as
+ * dozens of chunks; without retries a single transient network blip on any one
+ * of them ("fetch failed" / "Failed to fetch") kills the whole upload. We retry
+ * network errors and 5xx/429 responses, but surface 4xx (a real client error)
+ * immediately. Honours an AbortSignal so cancel still works.
+ */
+async function fetchRetry(url: string, init: RequestInit, signal?: AbortSignal): Promise<Response> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    if (signal?.aborted) throw new Error("Upload cancelled.");
+    try {
+      const res = await fetch(url, init);
+      // Retry only on transient server statuses; return everything else (incl.
+      // 4xx) to the caller, which decides how to report it.
+      if (res.status >= 500 || res.status === 429) {
+        if (attempt === MAX_ATTEMPTS) return res;
+        lastErr = new Error(`Server returned ${res.status}.`);
+      } else {
+        return res;
+      }
+    } catch (err) {
+      if (signal?.aborted) throw new Error("Upload cancelled.");
+      lastErr = err; // network-level failure (TypeError: Failed to fetch / fetch failed)
+      if (attempt === MAX_ATTEMPTS) break;
+    }
+    await sleep(RETRY_BASE_MS * 2 ** (attempt - 1)); // 600, 1200, 2400, 4800ms
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("Network request failed.");
+}
 
 /** Number of CHUNK_SIZE slices for a blob (at least 1, even if empty-ish). */
 function partCount(blob: Blob): number {
@@ -65,24 +100,27 @@ export async function uploadLessonAudio(
 
   await runPool(jobs, UPLOAD_CONCURRENCY, async ({ track, part, blob }) => {
     const url = `/api/upload/chunk?uploadId=${uploadId}&track=${track}&part=${part}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: authHeader,
-      body: blob,
+    const res = await fetchRetry(
+      url,
+      { method: "POST", headers: authHeader, body: blob, signal },
       signal,
-    });
+    );
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.error || `Upload failed (${res.status}).`);
     }
   });
 
-  const completeRes = await fetch("/api/upload/complete", {
-    method: "POST",
-    headers: { "content-type": "application/json", ...authHeader },
-    body: JSON.stringify({ uploadId, studentId, durationMin, parts }),
+  const completeRes = await fetchRetry(
+    "/api/upload/complete",
+    {
+      method: "POST",
+      headers: { "content-type": "application/json", ...authHeader },
+      body: JSON.stringify({ uploadId, studentId, durationMin, parts }),
+      signal,
+    },
     signal,
-  });
+  );
   const completeData = await completeRes.json().catch(() => ({}));
   if (!completeRes.ok) {
     throw new Error(completeData.error || `Couldn't start processing (${completeRes.status}).`);
@@ -94,10 +132,18 @@ export async function uploadLessonAudio(
     await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
     if (signal?.aborted) throw new Error("Upload cancelled.");
 
-    const res = await fetch(`/api/upload/status?uploadId=${uploadId}`, {
-      headers: authHeader,
-      signal,
-    });
+    // A transient network error mid-poll must not kill a job that's still
+    // processing (or already done) — swallow it and poll again next tick.
+    let res: Response;
+    try {
+      res = await fetch(`/api/upload/status?uploadId=${uploadId}`, {
+        headers: authHeader,
+        signal,
+      });
+    } catch {
+      if (signal?.aborted) throw new Error("Upload cancelled.");
+      continue;
+    }
     if (!res.ok) continue; // transient (e.g. eventual-consistency 404); keep polling.
     const status = await res.json();
     if (status.state === "done") return { lessonId: status.lessonId };

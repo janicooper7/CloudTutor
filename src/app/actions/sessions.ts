@@ -7,12 +7,58 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { sessions, tutors } from "@/db/schema";
+import { sessions, students, tutors } from "@/db/schema";
 import { currentTutorId } from "@/auth";
 import { getSessionById, getStudentById } from "@/db/queries";
 import { renderLessonReportPDF } from "@/lib/pdf";
 import { sendLessonReportEmail } from "@/lib/email";
 import type { SessionStatus, VocabItem } from "@/lib/mock";
+
+/**
+ * Recompute a student's denormalized profile stats from their lessons. Only
+ * "taught" lessons (confirmed or sent) count — a draft is still in review, so
+ * it shouldn't inflate the lesson count, vocab bank, or "areas to improve".
+ * Called after any session mutation that can change what's been taught.
+ */
+async function recomputeStudentStats(tutorId: string, studentId: string): Promise<void> {
+  const rows = await db
+    .select()
+    .from(sessions)
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.studentId, studentId)));
+
+  const taught = rows
+    .filter((s) => s.status === "confirmed" || s.status === "sent")
+    .sort((a, b) => b.isoDate.localeCompare(a.isoDate));
+
+  const vocab = new Set<string>();
+  for (const s of taught) {
+    for (const v of s.vocab) {
+      const term = v.term?.trim();
+      if (term) vocab.add(term.toLowerCase());
+    }
+  }
+
+  const latest = taught[0];
+  await db
+    .update(students)
+    .set({
+      lessonCount: taught.length,
+      vocabCount: vocab.size,
+      lastSeen: latest ? latest.date : "New",
+      focus: latest ? latest.focus : [],
+    })
+    .where(and(eq(students.tutorId, tutorId), eq(students.id, studentId)));
+}
+
+/** Look up the student a session belongs to, scoped to the tutor. */
+async function studentIdForSession(tutorId: string, sessionId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ studentId: sessions.studentId })
+    .from(sessions)
+    .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, sessionId)))
+    .limit(1);
+  return row?.studentId ?? null;
+}
 
 export async function setSessionStatus(id: string, status: SessionStatus): Promise<void> {
   const tutorId = await currentTutorId();
@@ -20,6 +66,8 @@ export async function setSessionStatus(id: string, status: SessionStatus): Promi
     .update(sessions)
     .set({ status })
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  const studentId = await studentIdForSession(tutorId, id);
+  if (studentId) await recomputeStudentStats(tutorId, studentId);
   revalidatePath("/dashboard", "layout");
 }
 
@@ -41,9 +89,11 @@ export async function setSessionTitle(id: string, title: string): Promise<void> 
  */
 export async function deleteSession(id: string): Promise<void> {
   const tutorId = await currentTutorId();
+  const studentId = await studentIdForSession(tutorId, id);
   await db
     .delete(sessions)
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  if (studentId) await recomputeStudentStats(tutorId, studentId);
   revalidatePath("/dashboard", "layout");
   redirect("/dashboard");
 }
@@ -72,6 +122,8 @@ export async function saveSessionFeedback(
     .update(sessions)
     .set({ ...data, status })
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+  const studentId = await studentIdForSession(tutorId, id);
+  if (studentId) await recomputeStudentStats(tutorId, studentId);
   revalidatePath("/dashboard", "layout");
 }
 
@@ -93,6 +145,9 @@ export async function sendLessonReport(
     .update(sessions)
     .set({ ...data, status: "confirmed" })
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.id, id)));
+
+  const confirmedStudentId = await studentIdForSession(tutorId, id);
+  if (confirmedStudentId) await recomputeStudentStats(tutorId, confirmedStudentId);
 
   try {
     const session = await getSessionById(id);

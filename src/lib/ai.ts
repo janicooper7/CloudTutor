@@ -147,7 +147,14 @@ export async function generateLessonFeedback(
     .filter(Boolean)
     .join("\n");
 
-  const response = await getClient().messages.create({
+  // Stream rather than a single blocking request. A long lesson (e.g. a 49-min
+  // transcript) is a large input with meaningful output + thinking, and a
+  // non-streaming call holds one HTTP request open for the whole generation —
+  // long enough that the socket gets dropped ("fetch failed") before it returns,
+  // especially inside the Netlify background worker. Streaming keeps the
+  // connection alive with incremental events; finalMessage() assembles the
+  // complete response. Structured outputs + adaptive thinking both work here.
+  const stream = getClient().messages.stream({
     model: MODEL,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
@@ -158,6 +165,7 @@ export async function generateLessonFeedback(
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: userContent }],
   });
+  const response = await stream.finalMessage();
 
   if (response.stop_reason === "refusal") {
     throw new Error("The model declined to generate feedback for this transcript.");

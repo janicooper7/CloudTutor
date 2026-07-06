@@ -81,8 +81,18 @@ export default function StudentDetailView({
 
   const firstName = student.name.split(" ")[0];
   const sortedHistory = sortSessions(history, "date");
-  // Most recent lesson drives the warm-up suggestion.
-  const latestLesson = sortSessions(history, "date")[0];
+  // Only confirmed/sent lessons count as "taught" — a draft is still in review,
+  // so it shouldn't drive the lesson count or the recommendation yet.
+  const taughtLessons = sortSessions(
+    history.filter((s) => s.status === "confirmed" || s.status === "sent"),
+    "date",
+  );
+  const lessonsTaught = taughtLessons.length;
+  // The recommendation leans on the most recent completed lesson's focus,
+  // falling back to the focus captured on the student profile.
+  const recommendedFocus = taughtLessons[0]?.focus?.[0] ?? student.focus[0];
+  // Most recent completed lesson drives the warm-up suggestion.
+  const latestLesson = taughtLessons[0];
   const warmUpTerms = latestLesson?.vocab.map((v) => v.term).filter(Boolean).slice(0, 3) ?? [];
 
   return (
@@ -147,7 +157,7 @@ export default function StudentDetailView({
             <Row k="Goal" v={student.goal} />
             <Row k="Native language" v={student.native} />
             {student.targetExam && <Row k="Target exam" v={student.targetExam} />}
-            <Row k="Lessons taught" v={String(student.lessonCount)} />
+            <Row k="Lessons taught" v={String(lessonsTaught)} />
             <Row k="Vocabulary bank" v={`${student.vocabCount} words`} />
             <Row k="Last lesson" v={student.lastSeen} />
           </dl>
@@ -244,12 +254,15 @@ export default function StudentDetailView({
             <div className="text-xs font-bold uppercase tracking-wide text-[#bcd8fb]">Suggested next</div>
             <h2 className="mt-2 font-display text-xl font-medium">Where to take {firstName} next</h2>
             <p className="mt-2 text-[#dbe9fd]">
-              {history.length === 0 ? (
+              {lessonsTaught === 0 ? (
                 <>Record your first lesson with {firstName} and CloudTutor will start building their journey — vocabulary, areas to improve, and what to work on next.</>
-              ) : (
-                <>Based on {student.lessonCount} lessons, CloudTutor recommends focusing on{" "}
-                <span className="font-semibold text-white">{student.focus[0]}</span> before moving
+              ) : recommendedFocus ? (
+                <>Based on {lessonsTaught} lesson{lessonsTaught === 1 ? "" : "s"}, CloudTutor recommends focusing on{" "}
+                <span className="font-semibold text-white">{recommendedFocus}</span> before moving
                 deeper into {student.goal.toLowerCase()} material.</>
+              ) : (
+                <>Based on {lessonsTaught} lesson{lessonsTaught === 1 ? "" : "s"}, CloudTutor recommends
+                continuing to build {firstName}&rsquo;s confidence with {student.goal.toLowerCase()} material.</>
               )}
             </p>
 
