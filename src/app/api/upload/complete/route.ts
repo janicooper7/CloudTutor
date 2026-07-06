@@ -85,10 +85,12 @@ export async function POST(req: NextRequest): Promise<Response> {
     store.setJSON(statusKey(uploadId), processing),
   ]);
 
-  // Kick the background function. It returns 202 immediately and keeps running
-  // detached, so awaiting this is fast and just confirms the trigger was accepted.
+  // Kick the background function at its canonical URL. It returns 202 immediately
+  // and keeps running detached, so awaiting this is fast and just confirms the
+  // trigger was accepted. If it's unreachable (e.g. not deployed → 404), surface
+  // that as an error status instead of leaving the client polling forever.
   try {
-    await fetch(`${req.nextUrl.origin}/internal/process`, {
+    const res = await fetch(`${req.nextUrl.origin}/.netlify/functions/process`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -96,6 +98,9 @@ export async function POST(req: NextRequest): Promise<Response> {
       },
       body: JSON.stringify({ uploadId }),
     });
+    if (!res.ok && res.status !== 202) {
+      throw new Error(`Processing worker returned ${res.status}.`);
+    }
   } catch (err) {
     const error = err instanceof Error ? err.message : "Couldn't start processing.";
     await store.setJSON(statusKey(uploadId), { state: "error", error } satisfies UploadStatus);

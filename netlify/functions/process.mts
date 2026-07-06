@@ -31,9 +31,12 @@ import {
   type UploadStatus,
 } from "@/lib/upload-store";
 
+// Background function (15-min budget). Invoked at its canonical URL
+// /.netlify/functions/process by /api/upload/complete. No custom `path` — the
+// Next.js plugin owns pretty-path routing, so we use the reserved functions URL
+// which Netlify's function router always resolves.
 export const config: Config = {
   background: true,
-  path: "/internal/process",
 };
 
 async function readTrack(

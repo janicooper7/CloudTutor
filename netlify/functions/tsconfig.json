@@ -1,0 +1,15 @@
+{
+  "// note": "Scoped to the Netlify functions bundler (zisi/esbuild). esbuild picks the tsconfig nearest the entry file, so this guarantees the '@/*' alias resolves to src/ when bundling process.mts. The Next.js app build uses the root tsconfig, unaffected by this file.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": "../..",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  }
+}

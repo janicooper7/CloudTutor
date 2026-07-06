@@ -18,6 +18,8 @@
   package = "@netlify/plugin-nextjs"
 
 [functions]
-  # esbuild bundles our src/ imports into the background function and resolves the
-  # "@/*" tsconfig path alias.
+  # Explicitly scan our functions dir so the Next.js plugin doesn't shadow it.
+  directory = "netlify/functions"
+  # esbuild bundles our src/ imports into the background function; the "@/*" alias
+  # is resolved via netlify/functions/tsconfig.json.
   node_bundler = "esbuild"
