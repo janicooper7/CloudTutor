@@ -9,6 +9,7 @@ import {
   uploadStore,
   jobKey,
   statusKey,
+  STALL_AFTER_MS,
   type UploadJob,
   type UploadStatus,
 } from "@/lib/upload-store";
@@ -49,6 +50,21 @@ export async function GET(req: NextRequest): Promise<Response> {
     consistency: "strong",
   })) as UploadStatus | null;
   if (!status) return json({ error: "Unknown upload." }, 404);
+
+  // A worker that is killed rather than thrown out of (platform timeout, OOM, a
+  // deploy mid-run) runs no catch block, so it never writes a terminal status and
+  // this blob stays "processing" forever. Once the job is older than any healthy
+  // run could be, report it as failed — and persist that, so the client, a later
+  // poll, and /api/admin/recover all agree. The audio survives either way (the
+  // worker only deletes it on success), so the upload stays recoverable.
+  if (status.state === "processing" && job?.startedAt && Date.now() - job.startedAt > STALL_AFTER_MS) {
+    const stalled: UploadStatus = {
+      state: "error",
+      error: "Processing stopped unexpectedly. The audio was kept — the lesson can be retried.",
+    };
+    await store.setJSON(statusKey(uploadId), stalled);
+    return json(stalled);
+  }
 
   return json(status);
 }

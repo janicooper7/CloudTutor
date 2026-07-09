@@ -127,7 +127,12 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   // Flip status back to processing so the client poll (and the list above) reflect
   // the retry, then re-trigger the same background worker /api/upload/complete uses.
-  await store.setJSON(statusKey(uploadId), { state: "processing" } satisfies UploadStatus);
+  // Restamp startedAt too, or the stall check in /api/upload/status would judge the
+  // retry against the original attempt's clock and call it dead on arrival.
+  await Promise.all([
+    store.setJSON(jobKey(uploadId), { ...job, startedAt: Date.now() } satisfies UploadJob),
+    store.setJSON(statusKey(uploadId), { state: "processing" } satisfies UploadStatus),
+  ]);
 
   try {
     const res = await fetch(`${req.nextUrl.origin}/.netlify/functions/process`, {

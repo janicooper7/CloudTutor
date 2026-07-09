@@ -78,6 +78,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     studentId,
     durationMin: Number.isFinite(durationMin) && durationMin > 0 ? durationMin : 45,
     parts: { student: studentParts, tutor: tutorParts },
+    startedAt: Date.now(),
   };
   const processing: UploadStatus = { state: "processing" };
   await Promise.all([

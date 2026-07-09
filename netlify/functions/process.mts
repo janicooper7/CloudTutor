@@ -26,6 +26,7 @@ import {
   chunkKey,
   jobKey,
   statusKey,
+  transcriptKey,
   allChunkKeys,
   type Track,
   type UploadJob,
@@ -96,16 +97,32 @@ const handler = async (req: Request): Promise<Response> => {
       `[process] job loaded student=${job.studentId} parts=${job.parts.student}/${job.parts.tutor}`,
     );
 
-    const [studentAudio, tutorAudio] = await Promise.all([
-      readTrack(store, uploadId, "student", job.parts.student),
-      readTrack(store, uploadId, "tutor", job.parts.tutor),
-    ]);
-    console.log(
-      `[process] audio assembled student=${studentAudio.length}B tutor=${tutorAudio.length}B — calling Deepgram`,
-    );
+    // A previous attempt may have transcribed successfully and then died in the
+    // drafting step. Reuse that transcript rather than re-billing Deepgram for
+    // both tracks — retries of a long lesson are otherwise expensive.
+    let transcript = (await store.get(transcriptKey(uploadId), {
+      type: "text",
+      consistency: "strong",
+    })) as string | null;
 
-    const transcript = await transcribeLesson({ studentAudio, tutorAudio });
-    console.log(`[process] transcript ready (${transcript.length} chars) — calling Claude`);
+    if (transcript) {
+      console.log(
+        `[process] reusing cached transcript (${transcript.length} chars) — skipping Deepgram`,
+      );
+    } else {
+      const [studentAudio, tutorAudio] = await Promise.all([
+        readTrack(store, uploadId, "student", job.parts.student),
+        readTrack(store, uploadId, "tutor", job.parts.tutor),
+      ]);
+      console.log(
+        `[process] audio assembled student=${studentAudio.length}B tutor=${tutorAudio.length}B — calling Deepgram`,
+      );
+
+      transcript = await transcribeLesson({ studentAudio, tutorAudio });
+      await store.set(transcriptKey(uploadId), transcript);
+      console.log(`[process] transcript ready (${transcript.length} chars) — cached`);
+    }
+    console.log("[process] calling Claude");
 
     const { id } = await createDraftLessonCore(job.tutorId, {
       studentId: job.studentId,
@@ -119,9 +136,12 @@ const handler = async (req: Request): Promise<Response> => {
       lessonId: id,
     } satisfies UploadStatus);
 
-    // Drop the audio; keep the tiny job + status blobs for the client's poll.
+    // Drop the audio and the cached transcript; keep the tiny job + status blobs
+    // for the client's poll.
     await Promise.all(
-      allChunkKeys(uploadId, job.parts).map((key) => store!.delete(key)),
+      [...allChunkKeys(uploadId, job.parts), transcriptKey(uploadId)].map((key) =>
+        store!.delete(key),
+      ),
     );
     console.log(`[process] complete uploadId=${uploadId}`);
   } catch (err) {

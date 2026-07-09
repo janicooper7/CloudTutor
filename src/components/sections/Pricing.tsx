@@ -141,11 +141,18 @@ export default function Pricing() {
                         <button
                           type="button"
                           onClick={() => setAnnual((s) => ({ ...s, [p.plan]: true }))}
-                          className={`rounded-full px-3 py-1 transition-all duration-300 ${
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-300 ${
                             isAnnual ? "bg-brand-deep text-white shadow-soft-sm" : "text-ink-soft hover:text-ink"
                           }`}
                         >
                           Annual
+                          <span
+                            className={`rounded-full px-1.5 py-0.5 text-[.62rem] font-bold uppercase tracking-wide ${
+                              isAnnual ? "bg-white/20 text-white" : "bg-brand-soft text-brand-deep"
+                            }`}
+                          >
+                            2 mo free
+                          </span>
                         </button>
                       </div>
                     )}

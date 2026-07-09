@@ -20,9 +20,22 @@ const MODEL = "claude-sonnet-5";
 
 // Lazy client so `next build` doesn't require the key at import time (mirrors the
 // lazy `db` client in src/db/index.ts).
+//
+// The SDK defaults (10-min timeout, 2 retries) allow up to 30 minutes of wall
+// clock on a stalled stream — longer than the 15-min budget of the background
+// worker that calls this. The platform would then kill the process mid-attempt,
+// so nothing throws, the worker's catch never runs, and the upload's status blob
+// stays "processing" forever. Cap it so a stall raises while the worker is still
+// alive: worst case 2 x 300s = 600s, comfortably inside the 15-min budget.
 let client: Anthropic | undefined;
 function getClient(): Anthropic {
-  if (!client) client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  if (!client) {
+    client = new Anthropic({
+      apiKey: env.ANTHROPIC_API_KEY,
+      timeout: 300_000,
+      maxRetries: 1,
+    });
+  }
   return client;
 }
 

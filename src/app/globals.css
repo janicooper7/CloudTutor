@@ -77,6 +77,33 @@ body::after {
 .animate-float-fast { animation: float 6s ease-in-out .4s infinite; }
 .animate-pulse-dot { animation: pulse-dot 2.2s ease-in-out infinite; }
 
+/* How-it-works demo */
+@keyframes ct-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes ct-eq { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+@keyframes ct-caret { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes ct-progress { from { width: 0; } to { width: 100%; } }
+.ct-rise { animation: ct-rise .55s var(--ease-smooth) both; }
+.ct-eq { animation: ct-eq 1s ease-in-out infinite; transform-origin: bottom; }
+.ct-caret { animation: ct-caret 1.05s step-end infinite; }
+
+/* hero "recap composes itself" demo */
+@keyframes ct-pop {
+  0%   { opacity: 0; transform: translateY(9px) scale(.9); }
+  60%  { transform: translateY(0) scale(1.04); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ct-gloss { from { transform: translateX(-120%); } to { transform: translateX(240%); } }
+@keyframes ct-grow  { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ct-aurora {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(20px,-16px) scale(1.1); }
+  66%     { transform: translate(-14px,12px) scale(.94); }
+}
+.ct-pop    { animation: ct-pop .5s var(--ease-smooth) both; }
+.ct-gloss  { animation: ct-gloss 1.5s var(--ease-smooth) .3s both; }
+.ct-grow   { animation: ct-grow 1.1s var(--ease-smooth) .2s both; transform-origin: left; }
+.ct-aurora { animation: ct-aurora 15s ease-in-out infinite; }
+
 /* reveal on scroll */
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease-smooth), transform .8s var(--ease-smooth); }
 .reveal.in { opacity: 1; transform: none; }
