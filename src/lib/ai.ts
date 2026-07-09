@@ -113,7 +113,7 @@ Field guidance:
 - topic: a short 2–5 word lesson topic drawn from the main theme (e.g. "Negotiating deadlines").
 - observedLevel: the CEFR level (A1–C2) the student actually demonstrated this lesson, based on their output — not their target.
 - talkTime: your best estimate of the share of speaking time, as two integers (tutor + student) that sum to 100. In a healthy lesson the student speaks at least half.
-- vocab: 3–6 words or phrases that genuinely came up and are worth reviewing. For each: the term, a short plain-English meaning, and one natural example sentence (prefer the student's own context/interests when it fits).
+- vocab: words or phrases that genuinely came up and are worth reviewing — scale the count to the lesson. A short or slow lesson may only yield 3–5, while a full ~50-minute lesson rich in language typically supports 8–12. Never pad the list with terms that didn't genuinely come up just to reach a number. For each: the term, a short plain-English meaning, and one natural example sentence (prefer the student's own context/interests when it fits).
 - wentWell: 2–3 concrete strengths shown in the transcript.
 - focus: 2–3 specific areas to improve, phrased constructively; include the correction where useful (e.g. 'Articles before abstract nouns ("the advice" → "advice")').
 - homework: one short, concrete task that practises this lesson's language.

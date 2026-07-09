@@ -152,7 +152,7 @@ export default function SessionReview({
       <div className="mt-6 rounded-2xl border border-line bg-surface p-6 shadow-soft-sm">
         <SectionLabel>Key student information</SectionLabel>
         {student ? (
-          <dl className="grid grid-cols-1 gap-2.5 text-sm sm:grid-cols-2">
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <InfoRow k="Goal" v={student.goal} />
             <InfoRow k="Native language" v={student.native} />
             <InfoRow k="Working level" v={student.level} />
@@ -174,21 +174,6 @@ export default function SessionReview({
             <div className="font-display text-lg font-medium text-ink">Student feedback</div>
           </div>
           <div className="flex flex-col gap-6 p-6">
-            <div className="rounded-xl border border-brand-line bg-brand-soft/30 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <SectionLabel>Lesson metrics</SectionLabel>
-                <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted">
-                  Measured from the lesson
-                </span>
-              </div>
-              <TalkTimeMeter studentPct={session.talkTime.student} />
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-brand-line/60 pt-3">
-                <span className="text-sm font-medium text-ink-soft">Observed level this lesson</span>
-                <span className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-brand-deep">
-                  {session.observedLevel}
-                </span>
-              </div>
-            </div>
             <VocabEditor vocab={vocab} setVocab={setVocab} disabled={sent} />
             <ListEditor
               title="Went well"
@@ -214,7 +199,7 @@ export default function SessionReview({
                 disabled={sent}
                 rows={3}
                 placeholder="Suggest a task to practise before next lesson…"
-                className="w-full resize-y rounded-xl border border-amber/30 bg-white px-4 py-3 text-sm text-ink outline-none transition-all focus:border-amber focus:ring-4 focus:ring-amber/20 disabled:opacity-70"
+                className="w-full resize-none rounded-xl border border-amber/30 bg-white px-4 py-3 text-sm text-ink outline-none transition-all [field-sizing:content] focus:border-amber focus:ring-4 focus:ring-amber/20 disabled:opacity-70"
               />
             </div>
             <div>
@@ -225,7 +210,7 @@ export default function SessionReview({
                 disabled={sent}
                 rows={3}
                 placeholder="Anything else to pass on to the student…"
-                className="w-full resize-y rounded-xl border border-brand-line bg-white px-4 py-3 text-sm text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="w-full resize-none rounded-xl border border-brand-line bg-white px-4 py-3 text-sm text-ink outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
               />
             </div>
           </div>
@@ -240,6 +225,21 @@ export default function SessionReview({
             <div className="font-display text-lg font-medium text-ink">Tutor notes</div>
           </div>
           <div className="flex flex-col gap-6 p-6">
+            <div className="rounded-xl border border-mint/30 bg-mint/5 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <SectionLabel>Lesson metrics</SectionLabel>
+                <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted">
+                  Measured from the lesson
+                </span>
+              </div>
+              <TalkTimeMeter studentPct={session.talkTime.student} />
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-mint/30 pt-3">
+                <span className="text-sm font-medium text-ink-soft">Observed level this lesson</span>
+                <span className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-[#137e70]">
+                  {session.observedLevel}
+                </span>
+              </div>
+            </div>
             {student && student.focus.length > 0 && (
               <div>
                 <SectionLabel>Focus areas</SectionLabel>
@@ -263,7 +263,7 @@ export default function SessionReview({
                 disabled={sent}
                 rows={2}
                 placeholder="Where in the material you stopped…"
-                className="w-full resize-y rounded-xl border border-mint/30 bg-white px-4 py-3 text-sm text-ink outline-none transition-all focus:border-mint focus:ring-4 focus:ring-mint/15 disabled:opacity-70"
+                className="w-full resize-none rounded-xl border border-mint/30 bg-white px-4 py-3 text-sm text-ink outline-none transition-all [field-sizing:content] focus:border-mint focus:ring-4 focus:ring-mint/15 disabled:opacity-70"
               />
             </div>
             <ListEditor
@@ -281,7 +281,7 @@ export default function SessionReview({
                 onChange={(e) => setNotes(e.target.value)}
                 disabled={sent}
                 rows={5}
-                className="w-full resize-y rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="w-full resize-none rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
               />
             </div>
           </div>
@@ -372,15 +372,15 @@ export default function SessionReview({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">{children}</div>
+    <div className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">{children}</div>
   );
 }
 
 function InfoRow({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex items-start justify-between gap-4">
-      <dt className="text-ink-soft">{k}</dt>
-      <dd className="text-right font-semibold text-ink">{v}</dd>
+    <div className="rounded-xl border border-line/70 bg-brand-soft/25 px-4 py-3">
+      <dt className="text-[.7rem] font-semibold uppercase tracking-wide text-muted">{k}</dt>
+      <dd className="mt-1 font-display text-base font-medium leading-snug text-ink">{v}</dd>
     </div>
   );
 }
@@ -428,17 +428,18 @@ function ListEditor({
       <SectionLabel>{title}</SectionLabel>
       <div className="flex flex-col gap-2">
         {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <input
+          <div key={i} className="flex items-start gap-2">
+            <textarea
               value={item}
               disabled={disabled}
               placeholder={placeholder}
+              rows={1}
               onChange={(e) => {
                 const next = [...items];
                 next[i] = e.target.value;
                 setItems(next);
               }}
-              className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-all focus:ring-4 disabled:opacity-70 ${toneRing[tone]}`}
+              className={`w-full resize-none rounded-xl border bg-white px-3.5 py-2.5 text-sm leading-snug text-ink outline-none transition-all [field-sizing:content] focus:ring-4 disabled:opacity-70 ${toneRing[tone]}`}
             />
             {!disabled && (
               <button
@@ -483,20 +484,24 @@ function VocabEditor({
       <div className="flex flex-col gap-3">
         {vocab.map((v, i) => (
           <div key={i} className="rounded-xl border border-brand-line bg-white/60 p-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2">
               <input
                 value={v.term}
                 disabled={disabled}
                 placeholder="term"
                 onChange={(e) => update(i, "term", e.target.value)}
-                className="w-2/5 rounded-lg border border-brand-line bg-white px-3 py-2 text-sm font-semibold text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="w-40 flex-none rounded-lg border border-brand-line bg-white px-3 py-2 text-sm font-semibold text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
               />
-              <input
+              <span className="mt-2 flex-none text-sm text-muted" aria-hidden>
+                —
+              </span>
+              <textarea
                 value={v.meaning}
                 disabled={disabled}
                 placeholder="meaning"
+                rows={1}
                 onChange={(e) => update(i, "meaning", e.target.value)}
-                className="w-3/5 rounded-lg border border-brand-line bg-white px-3 py-2 text-sm text-ink-soft outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="min-w-0 flex-1 resize-none rounded-lg border border-brand-line bg-white px-3 py-2 text-sm leading-snug text-ink-soft outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
               />
               {!disabled && (
                 <button
@@ -508,12 +513,13 @@ function VocabEditor({
                 </button>
               )}
             </div>
-            <input
+            <textarea
               value={v.example}
               disabled={disabled}
               placeholder="Example sentence from the lesson…"
+              rows={1}
               onChange={(e) => update(i, "example", e.target.value)}
-              className="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm italic text-ink-soft outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+              className="mt-2 w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm italic leading-snug text-ink-soft outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
             />
           </div>
         ))}
