@@ -56,7 +56,7 @@ export async function sendLessonReportEmail(args: {
   const { error } = await getClient().emails.send({
     from: env.EMAIL_FROM,
     to,
-    subject: `English lesson with ${tutorName} summary`,
+    subject: `Lesson insights with ${tutorName}`,
     html,
     attachments: [
       { filename: `BumbleNote lesson — ${topic}.pdf`, content: Buffer.from(pdf) },
