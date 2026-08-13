@@ -10,6 +10,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions, students } from "@/db/schema";
 import { generateLessonFeedback } from "@/lib/ai";
+import { insertWithUniqueId } from "@/lib/unique-id";
 
 export type CreateDraftLessonInput = {
   studentId: string;
@@ -23,18 +24,6 @@ function splitLevel(level: string): { from: string; to: string } {
   if (parts.length >= 2) return { from: parts[0], to: parts[1] };
   const only = parts[0] ?? level.trim();
   return { from: only, to: only };
-}
-
-async function uniqueSessionId(base: string, tutorId: string): Promise<string> {
-  const existing = await db
-    .select({ id: sessions.id })
-    .from(sessions)
-    .where(eq(sessions.tutorId, tutorId));
-  const taken = new Set(existing.map((r) => r.id));
-  let id = base;
-  let n = 2;
-  while (taken.has(id)) id = `${base}-${n++}`;
-  return id;
 }
 
 /**
@@ -91,32 +80,33 @@ export async function createDraftLessonCore(
       ? Math.round(input.durationMin)
       : 45;
 
-  const id = await uniqueSessionId(`s-${student.id}-${lessonNo}`, tutorId);
-
-  await db.insert(sessions).values({
-    id,
-    tutorId,
-    studentId: student.id,
-    studentName: student.name,
-    studentInitial: student.initial,
-    title: `Lesson ${lessonNo} · ${feedback.topic}`,
-    date,
-    isoDate,
-    durationMin,
-    status: "draft",
-    levelFrom: from,
-    levelTo: to,
-    observedLevel: feedback.observedLevel,
-    talkTime: feedback.talkTime,
-    vocab: feedback.vocab,
-    wentWell: feedback.wentWell,
-    focus: feedback.focus,
-    homework: feedback.homework,
-    additionalInfo: feedback.additionalInfo,
-    nextLesson: feedback.nextLesson,
-    lessonEndedAt: feedback.lessonEndedAt,
-    tutorNotes: feedback.tutorNotes,
-  });
+  // Global primary key, so uniqueness spans every tutor — see src/lib/unique-id.ts.
+  const id = await insertWithUniqueId(`s-${student.id}-${lessonNo}`, (candidateId) =>
+    db.insert(sessions).values({
+      id: candidateId,
+      tutorId,
+      studentId: student.id,
+      studentName: student.name,
+      studentInitial: student.initial,
+      title: `Lesson ${lessonNo} · ${feedback.topic}`,
+      date,
+      isoDate,
+      durationMin,
+      status: "draft",
+      levelFrom: from,
+      levelTo: to,
+      observedLevel: feedback.observedLevel,
+      talkTime: feedback.talkTime,
+      vocab: feedback.vocab,
+      wentWell: feedback.wentWell,
+      focus: feedback.focus,
+      homework: feedback.homework,
+      additionalInfo: feedback.additionalInfo,
+      nextLesson: feedback.nextLesson,
+      lessonEndedAt: feedback.lessonEndedAt,
+      tutorNotes: feedback.tutorNotes,
+    }),
+  );
 
   return { id };
 }
