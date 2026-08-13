@@ -71,7 +71,7 @@ export default async function DashboardHome() {
               </div>
               <div
                 className={`mt-2 inline-flex items-center gap-1 text-xs font-medium ${
-                  s.tone === "up" ? "text-mint" : s.tone === "down" ? "text-ink-soft" : "text-muted"
+                  s.tone === "up" ? "text-success-deep" : s.tone === "down" ? "text-ink-soft" : "text-muted"
                 }`}
               >
                 {s.tone === "up" && <ArrowUpIcon size={13} />}
@@ -87,14 +87,14 @@ export default async function DashboardHome() {
           <section className="rounded-2xl border border-line bg-surface p-6 shadow-soft-sm">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-display text-xl font-medium text-ink">Awaiting your review</h2>
-              <span className="rounded-full bg-amber/15 px-2.5 py-1 text-xs font-semibold text-[#b5791f]">
+              <span className="rounded-full bg-danger/12 px-2.5 py-1 text-xs font-semibold text-danger-deep">
                 {draftCount} {draftCount === 1 ? "draft" : "drafts"}
               </span>
             </div>
 
             {pending.length === 0 ? (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line bg-white/40 px-6 py-12 text-center">
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-mint/15 text-lg text-[#137e70]">✓</span>
+                <span className="grid h-11 w-11 place-items-center rounded-full bg-success/15 text-lg text-success-deep">✓</span>
                 <div className="font-semibold text-ink">All caught up</div>
                 <div className="text-sm text-muted">
                   Every lesson has been reviewed and sent. New drafts will appear here.

@@ -40,7 +40,7 @@ export default async function EnterPage({
             className={`w-full rounded-xl border bg-white px-4 py-3 text-ink outline-none transition-all duration-200 placeholder:text-muted focus:ring-4 ${
               error
                 ? "border-[#e77] focus:border-[#e77] focus:ring-[#e77]/15"
-                : "border-brand-line focus:border-brand focus:ring-brand/15"
+                : "border-brand-line focus:border-brand focus:ring-brand/30"
             }`}
           />
           {error ? (
@@ -52,7 +52,7 @@ export default async function EnterPage({
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-brand-deep px-6 py-3.5 font-semibold text-white shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft-md"
+          className="w-full rounded-xl bg-brand px-6 py-3.5 font-semibold text-ink shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft-md"
         >
           Continue
         </button>

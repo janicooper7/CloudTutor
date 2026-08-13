@@ -169,11 +169,11 @@ export default function SessionReview({
 
       {/* success banner */}
       {sent && (
-        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-mint/30 bg-mint/10 p-4">
-          <span className="grid h-9 w-9 flex-none place-items-center rounded-full bg-mint text-white">✓</span>
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-success/30 bg-success/10 p-4">
+          <span className="grid h-9 w-9 flex-none place-items-center rounded-full bg-success text-white">✓</span>
           <div>
-            <div className="font-semibold text-[#137e70]">Sent to {session.studentName}</div>
-            <div className="text-sm text-[#2b8a7c]">
+            <div className="font-semibold text-success-deep">Sent to {session.studentName}</div>
+            <div className="text-sm text-success-deep/80">
               The student feedback PDF was emailed. Tutor notes saved to their journey.
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function SessionReview({
                 disabled={sent}
                 rows={3}
                 placeholder="Anything else to pass on to the student…"
-                className="w-full resize-none rounded-xl border border-brand-line bg-white px-4 py-3 text-sm text-ink outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="w-full resize-none rounded-xl border border-brand-line bg-white px-4 py-3 text-sm text-ink outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/30 disabled:opacity-70"
               />
             </div>
           </div>
@@ -337,7 +337,7 @@ export default function SessionReview({
                 onChange={(e) => setNotes(e.target.value)}
                 disabled={sent}
                 rows={5}
-                className="w-full resize-none rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="w-full resize-none rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/30 disabled:opacity-70"
               />
             </div>
           </div>
@@ -347,12 +347,12 @@ export default function SessionReview({
       {/* actions */}
       {!sent && missingEmail && (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber/30 bg-amber/10 p-4">
-          <div className="text-sm font-medium text-[#b5791f]">
+          <div className="text-sm font-medium text-brand-deep">
             No email on file for {session.studentName} — add one to send the report.
           </div>
           <Link
             href={`/dashboard/students/${session.studentId}`}
-            className="rounded-lg border border-amber/40 bg-white/70 px-3.5 py-2 text-sm font-semibold text-[#b5791f] transition-colors hover:bg-white"
+            className="rounded-lg border border-amber/40 bg-white/70 px-3.5 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-white"
           >
             Add email →
           </Link>
@@ -391,10 +391,10 @@ export default function SessionReview({
         </div>
         <div
           className={`min-h-[1.25rem] flex-1 text-right text-sm font-medium ${
-            flashTone === "err" ? "text-[#d9534f]" : "text-mint"
+            flashTone === "err" ? "text-danger-deep" : "text-success-deep"
           }`}
         >
-          {saved ?? (dirty ? <span className="text-[#b5791f]">Unsaved changes</span> : null)}
+          {saved ?? (dirty ? <span className="text-brand-deep">Unsaved changes</span> : null)}
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
           {/* Saves in place: a confirmed lesson stays confirmed, so editing after
@@ -413,7 +413,7 @@ export default function SessionReview({
           <button
             onClick={() => save("confirmed")}
             disabled={sent || saving || confirmed}
-            className="inline-flex items-center gap-2 rounded-xl border border-brand-deep bg-brand-soft px-5 py-3 font-semibold text-brand-deep transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl border border-info bg-info/10 px-5 py-3 font-semibold text-info-deep transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {confirmed || sent ? "Confirmed ✓" : pending === "confirmed" ? "Confirming…" : "Confirm lesson"}
           </button>
@@ -421,8 +421,8 @@ export default function SessionReview({
             onClick={() => save("sent")}
             disabled={sent || saving || missingEmail || !confirmed}
             title={!confirmed && !sent ? "Confirm the lesson before sending." : undefined}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-            style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
           >
             {sent ? "Sent ✓" : pending === "sent" ? "Sending…" : "Send to student →"}
           </button>
@@ -456,7 +456,7 @@ function TalkTimeMeter({ studentPct }: { studentPct: number }) {
         <span className="text-[#137e70]">Tutor {tutorPct}%</span>
       </div>
       <div className="mt-2 flex h-3 overflow-hidden rounded-full bg-brand-soft">
-        <div className="bg-brand-deep" style={{ width: `${studentPct}%` }} />
+        <div className="bg-brand" style={{ width: `${studentPct}%` }} />
         <div className="bg-mint" style={{ width: `${tutorPct}%` }} />
       </div>
       <p className="mt-2 text-xs text-muted">Share of speaking time during the lesson.</p>
@@ -465,7 +465,7 @@ function TalkTimeMeter({ studentPct }: { studentPct: number }) {
 }
 
 const toneRing: Record<string, string> = {
-  brand: "focus:border-brand focus:ring-brand/15 border-brand-line",
+  brand: "focus:border-brand focus:ring-brand/30 border-brand-line",
   mint: "focus:border-mint focus:ring-mint/15 border-mint/30",
   amber: "focus:border-amber focus:ring-amber/20 border-amber/30",
 };
@@ -552,7 +552,7 @@ function VocabEditor({
                 disabled={disabled}
                 placeholder="term"
                 onChange={(e) => update(i, "term", e.target.value)}
-                className="w-40 flex-none rounded-lg border border-brand-line bg-white px-3 py-2 text-sm font-semibold text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="w-40 flex-none rounded-lg border border-brand-line bg-white px-3 py-2 text-sm font-semibold text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/30 disabled:opacity-70"
               />
               <span className="mt-2 flex-none text-sm text-muted" aria-hidden>
                 —
@@ -563,7 +563,7 @@ function VocabEditor({
                 placeholder="meaning"
                 rows={1}
                 onChange={(e) => update(i, "meaning", e.target.value)}
-                className="min-w-0 flex-1 resize-none rounded-lg border border-brand-line bg-white px-3 py-2 text-sm leading-snug text-ink-soft outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+                className="min-w-0 flex-1 resize-none rounded-lg border border-brand-line bg-white px-3 py-2 text-sm leading-snug text-ink-soft outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/30 disabled:opacity-70"
               />
               {!disabled && (
                 <button
@@ -581,7 +581,7 @@ function VocabEditor({
               placeholder="Example sentence from the lesson…"
               rows={1}
               onChange={(e) => update(i, "example", e.target.value)}
-              className="mt-2 w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm italic leading-snug text-ink-soft outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:opacity-70"
+              className="mt-2 w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm italic leading-snug text-ink-soft outline-none transition-all [field-sizing:content] focus:border-brand focus:ring-4 focus:ring-brand/30 disabled:opacity-70"
             />
           </div>
         ))}

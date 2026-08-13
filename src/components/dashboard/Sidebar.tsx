@@ -34,9 +34,6 @@ export default function Sidebar({
     <aside className="sticky top-0 hidden h-screen w-[260px] flex-none flex-col border-r border-line bg-surface/70 px-5 py-6 backdrop-blur md:flex">
       <Link href="/" className="mb-9 flex items-center gap-2.5 px-2">
         <Logo />
-        <span className="font-display text-[1.35rem] font-semibold tracking-tight text-ink">
-          BumbleNote
-        </span>
       </Link>
 
       <nav className="flex flex-col gap-1.5">
@@ -71,8 +68,8 @@ export default function Sidebar({
         <div className="rounded-xl border border-line bg-white/60 p-3">
           <div className="flex items-center gap-3">
             <span
-              className="grid h-9 w-9 flex-none place-items-center rounded-lg font-display font-semibold text-white"
-              style={{ background: "linear-gradient(145deg,#a9d0f8,#5f9bef)" }}
+              className="grid h-9 w-9 flex-none place-items-center rounded-lg font-display font-semibold text-ink"
+              style={{ background: "linear-gradient(145deg,#ffd143,#f0a500)" }}
             >
               {initial}
             </span>

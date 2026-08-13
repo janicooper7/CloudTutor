@@ -81,7 +81,7 @@ export default function Pricing() {
     <section id="pricing" className="py-24">
       <div className="mx-auto w-full max-w-[1240px] px-8">
         <Reveal className="mx-auto mb-8 max-w-2xl text-center">
-          <div className="text-[.82rem] font-bold uppercase tracking-widest text-brand">
+          <div className="text-[.82rem] font-bold uppercase tracking-widest text-brand-deep">
             Pricing
           </div>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.8vw,2.9rem)] font-medium tracking-tight">
@@ -116,7 +116,7 @@ export default function Pricing() {
                   }`}
                 >
                   {p.featured && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-deep px-4 py-1 text-[.74rem] font-bold tracking-wide text-white">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-4 py-1 text-[.74rem] font-bold tracking-wide text-ink">
                       Most popular
                     </span>
                   )}
@@ -133,7 +133,7 @@ export default function Pricing() {
                           type="button"
                           onClick={() => setAnnual((s) => ({ ...s, [p.plan]: false }))}
                           className={`rounded-full px-3 py-1 transition-all duration-300 ${
-                            !isAnnual ? "bg-brand-deep text-white shadow-soft-sm" : "text-ink-soft hover:text-ink"
+                            !isAnnual ? "bg-brand text-ink shadow-soft-sm" : "text-ink-soft hover:text-ink"
                           }`}
                         >
                           Monthly
@@ -142,7 +142,7 @@ export default function Pricing() {
                           type="button"
                           onClick={() => setAnnual((s) => ({ ...s, [p.plan]: true }))}
                           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-300 ${
-                            isAnnual ? "bg-brand-deep text-white shadow-soft-sm" : "text-ink-soft hover:text-ink"
+                            isAnnual ? "bg-brand text-ink shadow-soft-sm" : "text-ink-soft hover:text-ink"
                           }`}
                         >
                           Annual
@@ -202,12 +202,12 @@ export default function Pricing() {
                     href={href}
                     className={`group mt-auto inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
                       p.featured
-                        ? "bg-brand-deep text-white"
+                        ? "bg-brand text-ink"
                         : "border border-brand-line bg-white/60 text-ink hover:border-brand"
                     }`}
                     style={
                       p.featured
-                        ? { boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }
+                        ? { boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }
                         : undefined
                     }
                   >

@@ -148,10 +148,10 @@ export default function HeroVisual() {
               {/* ── capture header: the lesson, as sound ── */}
               <div
                 className="relative overflow-hidden px-6 pb-5 pt-5 text-white"
-                style={{ background: "linear-gradient(150deg,#1a5cc0 0%,#2f7fe6 100%)" }}
+                style={{ background: "linear-gradient(150deg,var(--panel) 0%,var(--panel-lift) 100%)" }}
               >
                 <div className="relative flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#0f4a97] px-3 py-1 text-[.72rem] font-semibold">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#0b1728] px-3 py-1 text-[.72rem] font-semibold">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M4 11a1 1 0 0 1 2 0v2a1 1 0 0 1-2 0Zm5-4a1 1 0 0 1 2 0v10a1 1 0 0 1-2 0Zm5 3a1 1 0 0 1 2 0v4a1 1 0 0 1-2 0Zm5-5a1 1 0 0 1 2 0v14a1 1 0 0 1-2 0Z" />
                     </svg>
@@ -160,7 +160,7 @@ export default function HeroVisual() {
                   <StatusBadge phase={phase} time={mmss} />
                 </div>
 
-                <div className="relative mt-3 text-[.76rem] font-medium text-[#c7dcf8]">
+                <div className="relative mt-3 text-[.76rem] font-medium text-[var(--panel-dim)]">
                   Lesson 12 · Business English
                 </div>
 
@@ -169,7 +169,7 @@ export default function HeroVisual() {
                   <VoicePanel
                     label="You"
                     sub="Tutor"
-                    tint="#ffffff"
+                    tint="#ffd143"
                     bars={WAVE_YOU}
                     active={listening || writing}
                   />
@@ -235,13 +235,13 @@ function VoicePanel({
   shift?: number;
 }) {
   return (
-    <div className="rounded-2xl bg-[#0f4a97] p-3">
+    <div className="rounded-2xl bg-[#0b1728] p-3">
       <div className="flex items-center gap-2">
         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: tint }} />
         <span className="truncate font-display text-[.92rem] font-semibold leading-none text-white">
           {label}
         </span>
-        <span className="ml-auto text-[.6rem] font-semibold uppercase tracking-wider text-[#9dc0ee]">
+        <span className="ml-auto text-[.6rem] font-semibold uppercase tracking-wider text-[var(--panel-dim)]">
           {sub}
         </span>
       </div>
@@ -266,7 +266,7 @@ function VoicePanel({
 function StatusBadge({ phase, time }: { phase: number; time: string }) {
   if (phase === PHASE.LISTEN) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0f4a97] px-2.5 py-1 text-[.72rem] font-bold tabular-nums">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0b1728] px-2.5 py-1 text-[.72rem] font-bold tabular-nums">
         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-[#ff8080]" />
         REC {time}
       </span>
@@ -274,14 +274,14 @@ function StatusBadge({ phase, time }: { phase: number; time: string }) {
   }
   if (phase === PHASE.WRITE) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0f4a97] px-2.5 py-1 text-[.72rem] font-bold">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0b1728] px-2.5 py-1 text-[.72rem] font-bold">
         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-white" />
         Writing recap…
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0f4a97] px-2.5 py-1 text-[.72rem] font-bold">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0b1728] px-2.5 py-1 text-[.72rem] font-bold">
       <span className="h-1.5 w-1.5 rounded-full bg-[#7ff0dc]" />
       Draft ready
     </span>
@@ -315,7 +315,7 @@ function Transcript() {
             <span className="text-[.95rem] leading-relaxed text-ink">
               {l.flag ? (
                 <>
-                  We <span className="rounded bg-amber/20 px-1 font-medium text-[#a2620f]">postpone</span> the
+                  We <span className="rounded bg-amber/20 px-1 font-medium text-brand-deep">postpone</span> the
                   deadline until Friday.
                 </>
               ) : (
@@ -379,7 +379,7 @@ function Recap({ instant }: { instant: boolean }) {
         className={`mb-5 rounded-xl border border-amber/30 bg-amber/10 p-3.5 ${instant ? "" : "ct-rise"}`}
         style={instant ? undefined : { animationDelay: "760ms" }}
       >
-        <div className="mb-1.5 flex items-center gap-1.5 text-[.7rem] font-bold uppercase tracking-wider text-[#b26a12]">
+        <div className="mb-1.5 flex items-center gap-1.5 text-[.7rem] font-bold uppercase tracking-wider text-brand-deep">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M12 3 2 21h20L12 3Z" />
             <path d="M12 9v5M12 17.5v.5" />
@@ -394,10 +394,10 @@ function Recap({ instant }: { instant: boolean }) {
       <div className="ct-rise flex items-center justify-between gap-3 border-t border-line pt-4" style={{ animationDelay: "220ms" }}>
         <span className="text-[.78rem] text-muted">Builds on 11 past lessons</span>
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full bg-brand-deep px-4 py-2 text-[.8rem] font-semibold text-white transition-all duration-500 ${
+          className={`inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-[.8rem] font-semibold text-ink transition-all duration-500 ${
             instant ? "ring-2 ring-brand/40" : "shadow-soft-sm"
           }`}
-          style={instant ? { boxShadow: "0 8px 22px -6px rgba(31,110,224,.75)" } : undefined}
+          style={instant ? { boxShadow: "0 8px 22px -6px rgba(210,140,0,.65)" } : undefined}
         >
           Send recap
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

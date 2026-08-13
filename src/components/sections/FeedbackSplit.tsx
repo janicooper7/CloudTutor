@@ -13,7 +13,7 @@ export default function FeedbackSplit() {
     <section id='feedback' className='pb-24'>
       <div className='mx-auto w-full max-w-[1160px] px-8'>
         <Reveal className='mx-auto mb-14 max-w-2xl text-center'>
-          <div className='text-[.82rem] font-bold uppercase tracking-widest text-brand'>
+          <div className='text-[.82rem] font-bold uppercase tracking-widest text-brand-deep'>
             Two outputs, one lesson
           </div>
           <h2 className='mt-4 font-display text-[clamp(2rem,3.8vw,2.9rem)] font-medium tracking-tight'>

@@ -35,7 +35,7 @@ export default async function SettingsPage() {
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-brand-soft">
               <div
-                className="h-full rounded-full bg-brand-deep transition-[width] duration-500"
+                className="h-full rounded-full bg-brand transition-[width] duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>

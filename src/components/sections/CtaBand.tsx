@@ -11,7 +11,7 @@ export default function CtaBand() {
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(50% 80% at 50% -10%, rgba(93,161,240,.18), transparent 60%)",
+                  "radial-gradient(50% 80% at 50% -10%, rgba(253,179,0,.2), transparent 60%)",
               }}
             />
             <h2 className="relative font-display text-[clamp(2rem,4vw,3rem)] font-medium tracking-tight">
@@ -23,8 +23,8 @@ export default function CtaBand() {
             </p>
             <Link
               href="/signup"
-              className="group relative mt-8 inline-flex items-center gap-2 rounded-full bg-brand-deep px-7 py-3.5 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-              style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+              className="group relative mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
+              style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
             >
               Start free trial
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>

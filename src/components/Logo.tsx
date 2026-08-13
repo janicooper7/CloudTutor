@@ -1,32 +1,65 @@
+import Image from 'next/image'
+
+// The lockup is drawn to a 194 x 64 box. The asset ships at 3x that (582 x 192)
+// and is served unoptimized: Next 16 pins `quality` to an allowlist (default
+// [75]), and a lossy pass at that setting rings around the wordmark's hard black
+// edges. A palette PNG of flat artwork is both sharper and smaller here.
+const BOX = { width: 194, height: 64 }
+const RATIO = BOX.width / BOX.height
+
+/**
+ * The BumbleNote lockup — bee + wordmark. It carries the product name, so it is
+ * labelled rather than decorative; callers should not set the name in type next
+ * to it.
+ *
+ * `tone="light"` swaps in the variant whose "bumble" letters are cream. The
+ * stock wordmark is near-black (#000818) and disappears on the dark panels.
+ */
 export default function Logo({
+  height = BOX.height,
+  tone = 'dark',
+  className = '',
+}: {
+  height?: number
+  tone?: 'dark' | 'light'
+  className?: string
+}) {
+  const width = Math.round(height * RATIO)
+  return (
+    <Image
+      src={tone === 'light' ? '/logo-lockup-light.png' : '/logo-lockup.png'}
+      alt='BumbleNote'
+      width={width}
+      height={height}
+      preload
+      unoptimized
+      className={className}
+      style={{ width, height }}
+    />
+  )
+}
+
+/**
+ * The bee on its own, square. For tight spots where the wordmark can't fit —
+ * the browser icons are generated from the same crop.
+ */
+export function LogoMark({
   size = 34,
   className = '',
 }: {
   size?: number
   className?: string
 }) {
+  const px = Math.round(size * 1.25)
   return (
-    <svg
-      width={size * 1.25}
-      height={size * 1.25}
-      viewBox='0 0 24 24'
-      fill='none'
+    <Image
+      src='/logo-mark.png'
+      alt=''
       aria-hidden
+      width={px}
+      height={px}
       className={className}
-      style={{ marginBottom: -size * 0.13 }}
-    >
-      <path
-        d='M6 15a4 4 0 0 1 .5-7.98A5.5 5.5 0 0 1 17.5 8 3.5 3.5 0 0 1 18 15H6Z'
-        fill='var(--color-brand)'
-      />
-      <path
-        d='M9.5 11.5l1.8 1.8 3.4-3.6'
-        transform='translate(0 -1.2)'
-        stroke='#fff'
-        strokeWidth='1.7'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-    </svg>
+      style={{ width: px, height: px }}
+    />
   )
 }

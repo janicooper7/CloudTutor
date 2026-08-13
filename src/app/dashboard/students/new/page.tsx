@@ -91,8 +91,8 @@ export default function NewStudentPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
                 href={`/dashboard/students/${created.id}`}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-                style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
+                style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
               >
                 View {created.name.split(" ")[0]}&apos;s profile →
               </Link>
@@ -218,8 +218,8 @@ export default function NewStudentPage() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
             >
               {saving ? "Adding…" : "Add student"}
             </button>
@@ -251,7 +251,7 @@ function Textarea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="w-full resize-y rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all duration-200 placeholder:text-muted focus:border-brand focus:ring-4 focus:ring-brand/15"
+        className="w-full resize-y rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all duration-200 placeholder:text-muted focus:border-brand focus:ring-4 focus:ring-brand/30"
       />
       {hint && <span className="mt-1.5 block text-sm text-muted">{hint}</span>}
     </label>
@@ -277,7 +277,7 @@ function Select({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all duration-200 focus:border-brand focus:ring-4 focus:ring-brand/15"
+        className="w-full rounded-xl border border-brand-line bg-white px-4 py-3 text-ink outline-none transition-all duration-200 focus:border-brand focus:ring-4 focus:ring-brand/30"
       >
         {options.map((o) => (
           <option key={o} value={o}>

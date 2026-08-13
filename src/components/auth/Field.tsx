@@ -35,7 +35,7 @@ export default function Field({
         className={`w-full rounded-xl border bg-white px-4 py-3 text-ink outline-none transition-all duration-200 placeholder:text-muted focus:ring-4 ${
           error
             ? "border-[#e77] focus:border-[#e77] focus:ring-[#e77]/15"
-            : "border-brand-line focus:border-brand focus:ring-brand/15"
+            : "border-brand-line focus:border-brand focus:ring-brand/30"
         }`}
       />
       {error ? (

@@ -120,10 +120,10 @@ export default function StudentDetailView({
                 </span>
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    active ? "bg-mint/14 text-[#137e70]" : "bg-line text-ink-soft"
+                    active ? "bg-success/12 text-success-deep" : "bg-line text-ink-soft"
                   }`}
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-mint" : "bg-muted"}`} />
+                  <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-success" : "bg-muted"}`} />
                   {active ? "Active" : "Inactive"}
                 </span>
               </div>
@@ -148,7 +148,7 @@ export default function StudentDetailView({
               onChange={(e) => setEmail(e.target.value)}
               onBlur={saveEmail}
               placeholder="student@email.com"
-              className="mt-2 w-full rounded-xl border border-brand-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15"
+              className="mt-2 w-full rounded-xl border border-brand-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/30"
             />
             <p className="mt-1.5 text-xs text-muted">Where lesson-report PDFs are sent.</p>
           </div>
@@ -180,7 +180,7 @@ export default function StudentDetailView({
             <div className="mt-3 flex flex-wrap gap-2">
               {student.focus.length > 0 ? (
                 student.focus.map((f) => (
-                  <span key={f} className="rounded-full border border-amber/25 bg-amber/12 px-3 py-1.5 text-sm font-medium text-[#b5791f]">
+                  <span key={f} className="rounded-full border border-amber/25 bg-amber/12 px-3 py-1.5 text-sm font-medium text-brand-deep">
                     {f}
                   </span>
                 ))
@@ -202,7 +202,7 @@ export default function StudentDetailView({
               onBlur={saveNotes}
               rows={4}
               placeholder="Anything you want to remember about this student…"
-              className="mt-3 w-full resize-y rounded-xl border border-brand-line bg-white px-3.5 py-3 text-sm text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/15"
+              className="mt-3 w-full resize-y rounded-xl border border-brand-line bg-white px-3.5 py-3 text-sm text-ink outline-none transition-all focus:border-brand focus:ring-4 focus:ring-brand/30"
             />
           </div>
 
@@ -249,11 +249,11 @@ export default function StudentDetailView({
         <div className="flex flex-col gap-6">
           <section
             className="relative overflow-hidden rounded-2xl p-6 text-white shadow-soft-sm"
-            style={{ background: "linear-gradient(150deg,#123a6b,#1f6ee0)" }}
+            style={{ background: "linear-gradient(150deg,var(--panel),var(--panel-lift))" }}
           >
-            <div className="text-xs font-bold uppercase tracking-wide text-[#bcd8fb]">Suggested next</div>
+            <div className="text-xs font-bold uppercase tracking-wide text-brand-lit">Suggested next</div>
             <h2 className="mt-2 font-display text-xl font-medium">Where to take {firstName} next</h2>
-            <p className="mt-2 text-[#dbe9fd]">
+            <p className="mt-2 text-[var(--panel-text)]">
               {lessonsTaught === 0 ? (
                 <>Record your first lesson with {firstName} and BumbleNote will start building their journey — vocabulary, areas to improve, and what to work on next.</>
               ) : recommendedFocus ? (
@@ -268,10 +268,10 @@ export default function StudentDetailView({
 
             {warmUpTerms.length > 0 && (
               <div className="mt-4 rounded-xl border border-white/15 bg-white/10 p-4">
-                <div className="text-xs font-bold uppercase tracking-wide text-[#bcd8fb]">
+                <div className="text-xs font-bold uppercase tracking-wide text-brand-lit">
                   Warm-up exercise
                 </div>
-                <p className="mt-1.5 text-[#eaf2fe]">
+                <p className="mt-1.5 text-[var(--panel-text)]">
                   Recap last lesson: ask {firstName} to make a sentence with{" "}
                   {warmUpTerms.map((t, i) => (
                     <span key={t} className="font-semibold text-white">
@@ -310,11 +310,11 @@ export default function StudentDetailView({
                             if (e.key === "Enter") saveTitle(s.id);
                             if (e.key === "Escape") setEditingId(null);
                           }}
-                          className="w-full rounded-lg border border-brand-line bg-white px-3 py-2 text-sm font-semibold text-ink outline-none focus:border-brand focus:ring-4 focus:ring-brand/15"
+                          className="w-full rounded-lg border border-brand-line bg-white px-3 py-2 text-sm font-semibold text-ink outline-none focus:border-brand focus:ring-4 focus:ring-brand/30"
                         />
                         <button
                           onClick={() => saveTitle(s.id)}
-                          className="flex-none rounded-lg bg-brand-deep px-3 py-2 text-xs font-semibold text-white transition-transform hover:-translate-y-0.5"
+                          className="flex-none rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-ink transition-transform hover:-translate-y-0.5"
                         >
                           Save
                         </button>

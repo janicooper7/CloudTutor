@@ -30,8 +30,8 @@ export default function SessionRecorder({
           </div>
           <button
             onClick={() => start(studentId)}
-            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-            style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
+            style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
           >
             <MicIcon /> Record a session
           </button>
@@ -79,7 +79,7 @@ export default function SessionRecorder({
           </div>
           <button
             onClick={reset}
-            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
+            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
           >
             Try again
           </button>

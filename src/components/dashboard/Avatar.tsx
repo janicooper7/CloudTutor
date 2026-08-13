@@ -9,12 +9,12 @@ export default function Avatar({
 }) {
   return (
     <span
-      className={`grid flex-none place-items-center rounded-[13px] font-display font-semibold text-white ${className}`}
+      className={`grid flex-none place-items-center rounded-[13px] font-display font-semibold text-ink ${className}`}
       style={{
         width: size,
         height: size,
         fontSize: size * 0.4,
-        background: "linear-gradient(145deg,#a9d0f8,#5f9bef)",
+        background: "linear-gradient(145deg,#ffd143,#f0a500)",
       }}
     >
       {initial}

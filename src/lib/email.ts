@@ -26,17 +26,17 @@ export async function sendLessonReportEmail(args: {
   const topic = lessonTopic(session.title);
 
   const homeworkBlock = session.homework.trim()
-    ? `<p style="margin:16px 0 6px;font-weight:600;color:#123a6b;">Homework</p>
+    ? `<p style="margin:16px 0 6px;font-weight:600;color:#9a6400;">Homework</p>
        <p style="margin:0;color:#3f4750;">${escapeHtml(session.homework)}</p>`
     : "";
 
   const html = `
-  <div style="background:#eef4fd;padding:28px 0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
-    <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f4;">
-      <div style="background:#1f6ee0;padding:24px 28px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#cfe0fb;">BUMBLENOTE</div>
+  <div style="background:#fffaf0;padding:28px 0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #f0e6d6;">
+      <div style="background:#16233d;padding:24px 28px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#fdb300;">BUMBLENOTE</div>
         <div style="font-size:20px;font-weight:700;color:#ffffff;margin-top:6px;">${escapeHtml(topic)}</div>
-        <div style="font-size:13px;color:#dbe9fd;margin-top:4px;">${escapeHtml(session.date)} · ${session.durationMin} min</div>
+        <div style="font-size:13px;color:#c7d8f0;margin-top:4px;">${escapeHtml(session.date)} · ${session.durationMin} min</div>
       </div>
       <div style="padding:26px 28px;color:#1f2430;">
         <p style="margin:0 0 12px;">Hi ${escapeHtml(firstName)},</p>
@@ -47,7 +47,7 @@ export async function sendLessonReportEmail(args: {
         ${homeworkBlock}
         <p style="margin:20px 0 0;color:#3f4750;">See you next time,<br/>${escapeHtml(tutorName)}</p>
       </div>
-      <div style="padding:14px 28px;border-top:1px solid #eef1f6;font-size:12px;color:#8b909a;">
+      <div style="padding:14px 28px;border-top:1px solid #f2ead9;font-size:12px;color:#8b909a;">
         Sent with BumbleNote
       </div>
     </div>

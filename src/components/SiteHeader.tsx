@@ -41,9 +41,6 @@ export default function SiteHeader({ user }: { user?: SiteHeaderUser | null }) {
       <div className="mx-auto flex h-[78px] w-full max-w-[1160px] items-center justify-between px-8">
         <a href="#" className="flex items-center gap-2.5">
           <Logo />
-          <span className="font-display text-[1.4rem] font-semibold tracking-tight">
-            BumbleNote
-          </span>
         </a>
 
         <nav className="hidden items-center gap-10 font-medium text-ink-soft md:flex">
@@ -63,8 +60,8 @@ export default function SiteHeader({ user }: { user?: SiteHeaderUser | null }) {
           {accountLabel ? (
             <Link
               href="/dashboard"
-              className="group inline-flex items-center gap-2 rounded-full bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-              style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+              className="group inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
+              style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
             >
               {accountLabel}
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
@@ -76,8 +73,8 @@ export default function SiteHeader({ user }: { user?: SiteHeaderUser | null }) {
               </Link>
               <Link
                 href="/signup"
-                className="group inline-flex items-center gap-2 rounded-full bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-                style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+                className="group inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
+                style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
               >
                 Start free
                 <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>

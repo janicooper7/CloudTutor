@@ -1,19 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg:         #f4f9ff;
-  --color-bg-tint:    #eaf3ff;
+  /* Taken from the logo itself: honey (#ffb000 / #ffd030), the near-black navy of
+     the wordmark (#001020), and the pale sky of the bee's wings (#e0f0ff). Honey
+     carries colour, navy carries weight — nothing in the ramp is a dark orange,
+     which read as muddy at full-page scale. */
+  --color-bg:         #fffdf7;
+  --color-bg-tint:    #fff5e2;
   --color-surface:    #ffffff;
-  --color-ink:        #142a44;
-  --color-ink-soft:   #47607d;
-  --color-muted:      #8298b4;
-  --color-brand:      #3b8ef0;
-  --color-brand-deep: #1f6ee0;
-  --color-brand-soft: #e6f1ff;
-  --color-brand-line: #d5e7fb;
+  --color-ink:        #16233d;
+  --color-ink-soft:   #4d5d79;
+  --color-muted:      #8c9ab0;
+  --color-brand:      #fdb300;
+  --color-brand-lit:  #ffd143;
+  /* Honey is only ~1.8:1 on white, so it never carries text. --brand-deep is the
+     readable gold (≥4.5:1) for links and badge labels; ink is what sits on top of
+     a honey fill. */
+  --color-brand-deep: #9a6400;
+  --color-brand-soft: #fff4d9;
+  --color-brand-line: #f7dfa6;
   --color-mint:       #2bb6a4;
-  --color-amber:      #eaa24a;
-  --color-line:       #e4eefb;
+  --color-amber:      #e08c0b;
+  --color-line:       #efe6d6;
+
+  /* Lesson status. Deliberately outside the honey brand ramp so a tutor can read
+     "needs review / confirmed / completed" at a glance instead of parsing shades
+     of gold. The -deep pair is the text tone (≥4.5:1 on white). */
+  --color-danger:       #e2574c;
+  --color-danger-deep:  #b83a30;
+  --color-info:         #4b86d8;
+  --color-info-deep:    #2a5fa8;
+  --color-success:      #3faa6d;
+  --color-success-deep: #1c7a4c;
 
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans:    var(--font-hanken), system-ui, sans-serif;
@@ -22,9 +40,17 @@
 }
 
 :root {
-  --shadow-sm: 0 2px 10px rgba(31,110,224,.06);
-  --shadow-md: 0 12px 34px -14px rgba(31,110,224,.22);
-  --shadow-lg: 0 30px 70px -28px rgba(31,110,224,.32);
+  /* The dark panels — auth aside, journey band, hero card header, "suggested
+     next". Plain custom properties rather than @theme tokens because they are
+     only ever used inside gradients, which Tailwind can't see to keep alive. */
+  --panel:      #0f1b30;
+  --panel-lift: #24406e;
+  --panel-text: #dbe8fb;
+  --panel-dim:  #a9c1e4;
+
+  --shadow-sm: 0 2px 10px rgba(22,35,61,.06);
+  --shadow-md: 0 12px 34px -14px rgba(22,35,61,.20);
+  --shadow-lg: 0 30px 70px -28px rgba(22,35,61,.30);
 }
 
 * { box-sizing: border-box; }
@@ -54,8 +80,8 @@ body::before {
   content: "";
   position: fixed; inset: 0; z-index: -2;
   background:
-    radial-gradient(60% 45% at 82% -5%, rgba(93,161,240,.22), transparent 60%),
-    radial-gradient(55% 40% at 8% 8%, rgba(150,196,247,.18), transparent 55%),
+    radial-gradient(60% 45% at 82% -5%, rgba(253,179,0,.16), transparent 60%),
+    radial-gradient(55% 40% at 8% 8%, rgba(140,180,235,.16), transparent 55%),
     linear-gradient(180deg, var(--color-bg), var(--color-bg-tint));
 }
 body::after {

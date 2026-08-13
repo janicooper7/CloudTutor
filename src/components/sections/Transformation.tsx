@@ -55,7 +55,7 @@ export default function Transformation() {
     <section className="py-24">
       <div className="mx-auto w-full max-w-[1160px] px-8">
         <Reveal className="mb-14 max-w-2xl">
-          <div className="text-[.82rem] font-bold uppercase tracking-widest text-brand">
+          <div className="text-[.82rem] font-bold uppercase tracking-widest text-brand-deep">
             The part you&apos;d never have time for
           </div>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.8vw,2.9rem)] font-medium tracking-tight">
@@ -111,14 +111,14 @@ export default function Transformation() {
 
           {/* ---- connector ---- */}
           <Reveal delay={140} className="hidden lg:block">
-            <div className="flex flex-col items-center gap-2 px-1 text-brand">
+            <div className="flex flex-col items-center gap-2 px-1 text-brand-deep">
               <span className="text-[.7rem] font-bold uppercase tracking-wider text-muted">
                 reads it
               </span>
               <svg width="40" height="20" viewBox="0 0 40 20" fill="none" aria-hidden>
                 <path
                   d="M2 10h34m0 0-7-6m7 6-7 6"
-                  stroke="var(--color-brand)"
+                  stroke="var(--color-brand-deep)"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"

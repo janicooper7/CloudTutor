@@ -70,7 +70,7 @@ export default function HowItWorks() {
     <section id="how" className="py-24">
       <div className="mx-auto w-full max-w-[1160px] px-8">
         <Reveal className="mb-14 max-w-2xl">
-          <div className="text-[.82rem] font-bold uppercase tracking-widest text-brand">
+          <div className="text-[.82rem] font-bold uppercase tracking-widest text-brand-deep">
             How it works
           </div>
           <h2 className="mt-4 font-display text-[clamp(2rem,3.8vw,2.9rem)] font-medium tracking-tight">
@@ -102,7 +102,7 @@ export default function HowItWorks() {
                     <span
                       className={`grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[12px] font-display text-lg font-semibold transition-colors duration-300 ${
                         isActive
-                          ? "bg-brand text-white"
+                          ? "bg-brand text-ink"
                           : "bg-brand-soft text-brand-deep"
                       }`}
                     >
@@ -151,9 +151,9 @@ export default function HowItWorks() {
           >
             {/* window chrome */}
             <div className="flex items-center gap-2 border-b border-line bg-bg-tint/60 px-4 py-3">
-              <span className="h-3 w-3 rounded-full bg-[#f2b9b0]" />
-              <span className="h-3 w-3 rounded-full bg-[#f4d7a3]" />
-              <span className="h-3 w-3 rounded-full bg-[#b7e3c4]" />
+              <span className="h-3 w-3 rounded-full bg-[#f3b7b1]" />
+              <span className="h-3 w-3 rounded-full bg-[#ffd97a]" />
+              <span className="h-3 w-3 rounded-full bg-[#a9dcbc]" />
               <span className="ml-3 rounded-md bg-surface px-2.5 py-1 text-[.7rem] font-semibold tracking-wide text-muted">
                 bumblenote · {steps[active].tag}
               </span>
@@ -189,7 +189,7 @@ function SceneRecord({ playing }: { playing: boolean }) {
     <div className="flex h-full flex-col items-center justify-center">
       <div className="ct-rise w-full max-w-[320px] rounded-[20px] border border-line bg-white p-5 shadow-soft-md">
         <div className="mb-4 flex items-center gap-2 text-[.72rem] font-bold uppercase tracking-widest text-muted">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-brand text-white">☁</span>
+          <span className="grid h-6 w-6 place-items-center rounded-md bg-brand text-ink">☁</span>
           BumbleNote
         </div>
 
@@ -197,7 +197,7 @@ function SceneRecord({ playing }: { playing: boolean }) {
           Student
         </div>
         <div className="mb-5 flex items-center gap-3 rounded-xl border border-brand-line bg-brand-soft px-3 py-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-semibold text-white">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-semibold text-ink">
             M
           </span>
           <span className="font-medium text-ink">Maria García</span>
@@ -324,7 +324,7 @@ function SceneDraft({ playing }: { playing: boolean }) {
         style={rise(820)}
       >
         → Next lesson: role-play negotiating a deadline
-        <span className={`ml-1 inline-block h-4 w-[2px] bg-brand-deep ${playing ? "ct-caret" : ""}`} />
+        <span className={`ml-1 inline-block h-4 w-[2px] bg-ink ${playing ? "ct-caret" : ""}`} />
       </div>
     </div>
   );
@@ -346,7 +346,7 @@ function SceneSend() {
           <div className="h-2.5 w-4/5 rounded-full bg-line" />
           <div className="flex items-center gap-2">
             <div className="h-2.5 w-2/5 rounded-full bg-brand-soft" />
-            <span className="inline-block h-4 w-[2px] bg-brand ct-caret" />
+            <span className="inline-block h-4 w-[2px] bg-ink ct-caret" />
           </div>
           <div className="h-2.5 w-3/4 rounded-full bg-line" />
         </div>
@@ -355,7 +355,7 @@ function SceneSend() {
       <div className="ct-rise mt-4 flex items-center gap-3" style={rise(240)}>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-medium text-white shadow-soft-sm"
+          className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-medium text-ink shadow-soft-sm"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
             <path d="m22 2-7 20-4-9-9-4Z" />

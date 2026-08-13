@@ -40,7 +40,7 @@ export default function StudentsView({ list }: { list: Student[] }) {
         </div>
         <Link
           href="/dashboard/students/new"
-          className="flex-none rounded-xl bg-brand-deep px-4 py-2.5 text-center text-sm font-semibold text-white shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5"
+          className="flex-none rounded-xl bg-brand px-4 py-2.5 text-center text-sm font-semibold text-ink shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5"
         >
           + Add student
         </Link>
@@ -130,11 +130,11 @@ function StudentRow({
         <div className="flex items-center gap-2">
           <span className="truncate font-semibold text-ink">{st.name}</span>
           {st.lessonCount === 0 ? (
-            <span className="flex-none rounded-full bg-amber/12 px-2 py-0.5 text-[11px] font-semibold text-[#b5791f]">
+            <span className="flex-none rounded-full bg-amber/12 px-2 py-0.5 text-[11px] font-semibold text-brand-deep">
               New
             </span>
           ) : st.trend === "up" ? (
-            <span className="hidden flex-none items-center gap-1 rounded-full bg-mint/12 px-2 py-0.5 text-[11px] font-semibold text-[#137e70] sm:inline-flex">
+            <span className="hidden flex-none items-center gap-1 rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success-deep sm:inline-flex">
               <ArrowUpIcon size={11} /> Improving
             </span>
           ) : null}

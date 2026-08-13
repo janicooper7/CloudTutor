@@ -68,7 +68,7 @@ export default function RecordLessonButton({
     <>
       <button
         onClick={() => setPickerOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-deep px-4 py-3 font-semibold text-white shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 font-semibold text-ink shadow-soft-sm transition-all duration-300 hover:-translate-y-0.5"
       >
         <RecDot /> Record a lesson
       </button>
@@ -98,7 +98,7 @@ export default function RecordLessonButton({
                     <Link
                       href="/#pricing"
                       onClick={closeIdle}
-                      className="mt-3 block rounded-lg bg-brand-deep px-4 py-2 text-center font-semibold text-white"
+                      className="mt-3 block rounded-lg bg-brand px-4 py-2 text-center font-semibold text-ink"
                     >
                       See plans
                     </Link>
@@ -109,7 +109,7 @@ export default function RecordLessonButton({
                     <Link
                       href="/dashboard/students/new"
                       onClick={closeIdle}
-                      className="mt-3 block rounded-lg bg-brand-deep px-4 py-2 text-center font-semibold text-white"
+                      className="mt-3 block rounded-lg bg-brand px-4 py-2 text-center font-semibold text-ink"
                     >
                       Add a student
                     </Link>
@@ -206,7 +206,7 @@ export default function RecordLessonButton({
                 <p className="mb-5 text-sm text-ink-soft">{error}</p>
                 <button
                   onClick={closeIdle}
-                  className="w-full rounded-xl bg-brand-deep px-6 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
+                  className="w-full rounded-xl bg-brand px-6 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
                 >
                   Close
                 </button>

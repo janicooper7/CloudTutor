@@ -10,16 +10,16 @@ const MARGIN = 48;
 const HEADER_H = 132;
 
 const C = {
-  brand: rgb(0.122, 0.431, 0.878),
-  brandDeep: rgb(0.071, 0.227, 0.42),
-  ink: rgb(0.13, 0.15, 0.19),
-  inkSoft: rgb(0.32, 0.36, 0.42),
-  muted: rgb(0.55, 0.58, 0.63),
+  brand: rgb(0.992, 0.702, 0),
+  brandDeep: rgb(0.604, 0.392, 0),
+  ink: rgb(0.086, 0.137, 0.239),
+  inkSoft: rgb(0.302, 0.365, 0.475),
+  muted: rgb(0.549, 0.604, 0.69),
   mint: rgb(0.075, 0.494, 0.44),
-  amber: rgb(0.71, 0.47, 0.12),
-  soft: rgb(0.93, 0.95, 0.99),
+  amber: rgb(0.667, 0.451, 0.075),
+  soft: rgb(1, 0.957, 0.851),
   white: rgb(1, 1, 1),
-  line: rgb(0.88, 0.9, 0.94),
+  line: rgb(0.937, 0.902, 0.839),
 };
 
 type Fonts = { reg: PDFFont; bold: PDFFont; italic: PDFFont };
@@ -149,19 +149,19 @@ async function build(
     const size = 10.5;
     const lh = size * 1.45;
     ensure(lh);
-    page.drawText("•", { x: MARGIN, y: H - y - size, size, font: fonts.bold, color: C.brand });
+    page.drawText("•", { x: MARGIN, y: H - y - size, size, font: fonts.bold, color: C.brandDeep });
     // Draw the wrapped body indented; reuse `text` with an x offset.
     text(str, { x: MARGIN + 16, size, color, lineHeight: lh });
   }
 
   // ---- Header band ----
-  page.drawRectangle({ x: 0, y: H - HEADER_H, width: W, height: HEADER_H, color: C.brand });
+  page.drawRectangle({ x: 0, y: H - HEADER_H, width: W, height: HEADER_H, color: C.ink });
   page.drawText("BUMBLENOTE", {
     x: MARGIN,
     y: H - 40,
     size: 10,
     font: fonts.bold,
-    color: rgb(0.8, 0.88, 1),
+    color: C.brand,
   });
   const topic = session.title.includes("·")
     ? session.title.split("·").slice(1).join("·").trim()
@@ -178,7 +178,7 @@ async function build(
     y: H - 98,
     size: 11,
     font: fonts.reg,
-    color: rgb(0.86, 0.92, 1),
+    color: rgb(0.78, 0.85, 0.94),
   });
 
   // ---- Lesson snapshot ----

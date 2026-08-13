@@ -16,7 +16,7 @@ export default function Hero() {
               Teach the lesson.{" "}
               <em className="italic text-brand-deep">
                 The feedback writes itself.
-                <span className="ml-1 inline-block h-[0.82em] w-[3px] translate-y-[0.08em] rounded-sm bg-brand-deep ct-caret align-baseline" />
+                <span className="ml-1 inline-block h-[0.82em] w-[3px] translate-y-[0.08em] rounded-sm bg-ink ct-caret align-baseline" />
               </em>
             </h1>
           </Reveal>
@@ -34,8 +34,8 @@ export default function Hero() {
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
                 href="/signup"
-                className="group inline-flex items-center gap-2 rounded-full bg-brand-deep px-7 py-3.5 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5"
-                style={{ boxShadow: "0 10px 24px -10px rgba(31,110,224,.7)" }}
+                className="group inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5"
+                style={{ boxShadow: "0 10px 24px -10px rgba(210,140,0,.6)" }}
               >
                 Start free trial
                 <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
