@@ -14,8 +14,11 @@ import { CEFR_LEVELS, type CEFRLevel, type TalkTime, type VocabItem } from "./mo
 // Kept as a single swappable constant. Sonnet 5 is used here for speed (roughly
 // halves the analysis step vs Opus 4.8, ~5x cheaper) while keeping high quality
 // on this structured-feedback task. Switch to "claude-opus-4-8" for maximum
-// quality, or "claude-haiku-4-5" for the fastest/cheapest at a larger quality
-// tradeoff. All support adaptive thinking + effort + json_schema output.
+// quality — it takes the same adaptive thinking + effort + json_schema options.
+//
+// "claude-haiku-4-5" is cheaper still but is NOT a one-line swap: it rejects
+// `output_config.effort`, and its only thinking mode is the older fixed budget
+// (`type: "enabled"` + `budget_tokens`) rather than `type: "adaptive"`.
 const MODEL = "claude-sonnet-5";
 
 // Lazy client so `next build` doesn't require the key at import time (mirrors the
