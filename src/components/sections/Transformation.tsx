@@ -1,6 +1,6 @@
 import Reveal from "../Reveal";
 
-// A live-lesson moment, then what CloudTutor extracts from it. The point of this
+// A live-lesson moment, then what BumbleNote extracts from it. The point of this
 // section: show the *depth* — the small, recurring mistakes a tutor can't jot
 // down while teaching — and that the two voices are cleanly separated.
 
@@ -62,7 +62,7 @@ export default function Transformation() {
             It reads every line, so you don&apos;t have to.
           </h2>
           <p className="mt-4 text-lg text-ink-soft">
-            CloudTutor keeps your voice and your student&apos;s cleanly apart, then works
+            BumbleNote keeps your voice and your student&apos;s cleanly apart, then works
             through the whole conversation — catching the small, recurring mistakes that
             slip past while you&apos;re busy teaching.
           </p>
@@ -131,7 +131,7 @@ export default function Transformation() {
           <Reveal delay={220}>
             <div className="rounded-[22px] border border-brand-line bg-surface p-6 shadow-soft-md sm:p-7">
               <div className="mb-5 text-[.72rem] font-bold uppercase tracking-[.12em] text-muted">
-                What CloudTutor pulled out
+                What BumbleNote pulled out
               </div>
               <ul className="flex flex-col gap-3.5">
                 {insights.map((it, i) => (

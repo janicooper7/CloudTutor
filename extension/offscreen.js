@@ -1,4 +1,4 @@
-// Owns the actual audio capture + recording, then uploads to CloudTutor.
+// Owns the actual audio capture + recording, then uploads to BumbleNote.
 //   - tab audio  -> the STUDENT (the remote participant, played into the tab)
 //   - microphone -> the TUTOR   (this machine's mic)
 // For a 1-on-1 browser call this cleanly separates the two speakers without any

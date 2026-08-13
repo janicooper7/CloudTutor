@@ -33,7 +33,7 @@ export default function Sidebar({
       <Link href="/" className="mb-9 flex items-center gap-2.5 px-2">
         <Logo />
         <span className="font-display text-[1.35rem] font-semibold tracking-tight text-ink">
-          CloudTutor
+          BumbleNote
         </span>
       </Link>
 

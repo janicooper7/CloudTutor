@@ -37,7 +37,7 @@ export default function Testimonials() {
             Less admin, better lessons.
           </h2>
           <p className="mt-4 text-lg text-ink-soft">
-            Tutors across every major platform use CloudTutor to teach more and type less.
+            Tutors across every major platform use BumbleNote to teach more and type less.
           </p>
         </Reveal>
 

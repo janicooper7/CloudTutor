@@ -32,7 +32,7 @@ export default function Journey() {
                   It remembers every lesson, so you don&apos;t have to.
                 </h2>
                 <p className="mt-4 text-lg text-[#dbe9fd]">
-                  CloudTutor builds a living profile for each student — a growing
+                  BumbleNote builds a living profile for each student — a growing
                   vocabulary bank, recurring error patterns, and a level trajectory. Every
                   new draft is written with their whole history in mind, so &ldquo;what to
                   focus on next&rdquo; is always grounded in real progress.

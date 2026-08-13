@@ -79,7 +79,7 @@ export default function NewStudentPage() {
               {created.name} is ready to go
             </h2>
             <p className="mt-2 text-ink-soft">
-              Their profile is set up. Record your first lesson and CloudTutor will start
+              Their profile is set up. Record your first lesson and BumbleNote will start
               building their journey.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">

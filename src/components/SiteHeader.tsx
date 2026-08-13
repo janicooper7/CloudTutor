@@ -42,7 +42,7 @@ export default function SiteHeader({ user }: { user?: SiteHeaderUser | null }) {
         <a href="#" className="flex items-center gap-2.5">
           <Logo />
           <span className="font-display text-[1.4rem] font-semibold tracking-tight">
-            CloudTutor
+            BumbleNote
           </span>
         </a>
 

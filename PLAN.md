@@ -1,4 +1,4 @@
-# CloudTutor — MVP Plan
+# BumbleNote — MVP Plan
 
 A **web app + companion browser extension** for **1-on-1 online language tutors**.
 Because it captures the browser tab's audio (not any single platform's API), it works

@@ -23,7 +23,7 @@ export default function Hero() {
 
           <Reveal delay={160}>
             <p className="mt-5 max-w-[36ch] text-xl text-ink-soft">
-              CloudTutor listens in on your English lessons — Meet, Zoom, Preply, italki,
+              BumbleNote listens in on your English lessons — Meet, Zoom, Preply, italki,
               any browser call — and turns each one into finished feedback: vocabulary in
               context, the mistakes you&apos;d never catch mid-lesson, and a progress plan
               for every student. You just review and send.

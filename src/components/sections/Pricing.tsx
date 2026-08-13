@@ -18,7 +18,7 @@ type Plan = {
 const plans: Plan[] = [
   {
     name: "Free",
-    desc: "For tutors trying CloudTutor out.",
+    desc: "For tutors trying BumbleNote out.",
     monthly: null,
     lessons: "4 lessons / mo",
     features: ["Student & tutor feedback", "PDF export", "3 student profiles"],

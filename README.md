@@ -1,4 +1,4 @@
-# CloudTutor
+# BumbleNote
 
 A web app + companion browser extension for 1-on-1 online language tutors. It captures a
 lesson's audio (student = tab audio, tutor = mic), transcribes it, and uses Claude to generate

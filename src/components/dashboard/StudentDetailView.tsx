@@ -255,13 +255,13 @@ export default function StudentDetailView({
             <h2 className="mt-2 font-display text-xl font-medium">Where to take {firstName} next</h2>
             <p className="mt-2 text-[#dbe9fd]">
               {lessonsTaught === 0 ? (
-                <>Record your first lesson with {firstName} and CloudTutor will start building their journey — vocabulary, areas to improve, and what to work on next.</>
+                <>Record your first lesson with {firstName} and BumbleNote will start building their journey — vocabulary, areas to improve, and what to work on next.</>
               ) : recommendedFocus ? (
-                <>Based on {lessonsTaught} lesson{lessonsTaught === 1 ? "" : "s"}, CloudTutor recommends focusing on{" "}
+                <>Based on {lessonsTaught} lesson{lessonsTaught === 1 ? "" : "s"}, BumbleNote recommends focusing on{" "}
                 <span className="font-semibold text-white">{recommendedFocus}</span> before moving
                 deeper into {student.goal.toLowerCase()} material.</>
               ) : (
-                <>Based on {lessonsTaught} lesson{lessonsTaught === 1 ? "" : "s"}, CloudTutor recommends
+                <>Based on {lessonsTaught} lesson{lessonsTaught === 1 ? "" : "s"}, BumbleNote recommends
                 continuing to build {firstName}&rsquo;s confidence with {student.goal.toLowerCase()} material.</>
               )}
             </p>

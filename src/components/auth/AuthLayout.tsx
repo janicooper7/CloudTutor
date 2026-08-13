@@ -33,7 +33,7 @@ export default function AuthLayout({
         <Link href="/" className="relative flex items-center gap-2.5">
           <Logo />
           <span className="font-display text-[1.4rem] font-semibold tracking-tight">
-            CloudTutor
+            BumbleNote
           </span>
         </Link>
 
@@ -80,7 +80,7 @@ export default function AuthLayout({
           <Link href="/" className="mb-10 flex items-center gap-2.5 lg:hidden">
             <Logo />
             <span className="font-display text-[1.3rem] font-semibold tracking-tight text-ink">
-              CloudTutor
+              BumbleNote
             </span>
           </Link>
 

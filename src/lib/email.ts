@@ -34,7 +34,7 @@ export async function sendLessonReportEmail(args: {
   <div style="background:#eef4fd;padding:28px 0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f4;">
       <div style="background:#1f6ee0;padding:24px 28px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#cfe0fb;">CLOUDTUTOR</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#cfe0fb;">BUMBLENOTE</div>
         <div style="font-size:20px;font-weight:700;color:#ffffff;margin-top:6px;">${escapeHtml(topic)}</div>
         <div style="font-size:13px;color:#dbe9fd;margin-top:4px;">${escapeHtml(session.date)} · ${session.durationMin} min</div>
       </div>
@@ -48,7 +48,7 @@ export async function sendLessonReportEmail(args: {
         <p style="margin:20px 0 0;color:#3f4750;">See you next time,<br/>${escapeHtml(tutorName)}</p>
       </div>
       <div style="padding:14px 28px;border-top:1px solid #eef1f6;font-size:12px;color:#8b909a;">
-        Sent with CloudTutor
+        Sent with BumbleNote
       </div>
     </div>
   </div>`;
@@ -59,7 +59,7 @@ export async function sendLessonReportEmail(args: {
     subject: `Your lesson notes — ${topic}`,
     html,
     attachments: [
-      { filename: `CloudTutor lesson — ${topic}.pdf`, content: Buffer.from(pdf) },
+      { filename: `BumbleNote lesson — ${topic}.pdf`, content: Buffer.from(pdf) },
     ],
   });
 

@@ -156,7 +156,7 @@ async function build(
 
   // ---- Header band ----
   page.drawRectangle({ x: 0, y: H - HEADER_H, width: W, height: HEADER_H, color: C.brand });
-  page.drawText("CLOUDTUTOR", {
+  page.drawText("BUMBLENOTE", {
     x: MARGIN,
     y: H - 40,
     size: 10,
@@ -227,7 +227,7 @@ async function build(
   // ---- Footer on every page ----
   const pages = doc.getPages();
   for (const p of pages) {
-    p.drawText(sanitize(`Prepared by ${opts.tutorName} with CloudTutor`), {
+    p.drawText(sanitize(`Prepared by ${opts.tutorName} with BumbleNote`), {
       x: MARGIN,
       y: 30,
       size: 8.5,

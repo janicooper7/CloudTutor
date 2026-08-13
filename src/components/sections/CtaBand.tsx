@@ -18,7 +18,7 @@ export default function CtaBand() {
               Give every student better feedback — in less time.
             </h2>
             <p className="relative mx-auto mt-4 max-w-[46ch] text-lg text-ink-soft">
-              Spend your energy teaching. Let CloudTutor remember, write, and track the
+              Spend your energy teaching. Let BumbleNote remember, write, and track the
               rest.
             </p>
             <Link

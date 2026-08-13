@@ -7,6 +7,6 @@
 
 export const DEV_TUTOR = {
   id: "00000000-0000-0000-0000-000000000001",
-  email: "dev@cloudtutor.local",
+  email: "dev@bumblenote.local",
   name: "Alex",
 } as const;

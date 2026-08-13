@@ -4,7 +4,7 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleAuthForm from "@/components/auth/GoogleAuthForm";
 
 export const metadata: Metadata = {
-  title: "Create your account · CloudTutor",
+  title: "Create your account · BumbleNote",
   description: "Start free — no card required. Better feedback for every student.",
 };
 

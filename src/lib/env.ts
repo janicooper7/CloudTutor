@@ -34,6 +34,6 @@ export const env = {
   // works for testing (only delivers to your own account email); set a verified
   // domain sender for real students.
   get EMAIL_FROM() {
-    return process.env.EMAIL_FROM || "CloudTutor <onboarding@resend.dev>";
+    return process.env.EMAIL_FROM || "BumbleNote <onboarding@resend.dev>";
   },
 };

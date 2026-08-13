@@ -16,7 +16,7 @@ const steps = [
     n: 2,
     tag: "listening",
     title: "It listens & separates",
-    body: "CloudTutor captures the conversation and cleanly tells your voice apart from your student's — no diarization guesswork.",
+    body: "BumbleNote captures the conversation and cleanly tells your voice apart from your student's — no diarization guesswork.",
   },
   {
     n: 3,
@@ -77,7 +77,7 @@ export default function HowItWorks() {
             From live lesson to polished feedback, automatically.
           </h2>
           <p className="mt-4 text-lg text-ink-soft">
-            Start your lesson as usual. CloudTutor handles the rest and hands you a draft
+            Start your lesson as usual. BumbleNote handles the rest and hands you a draft
             the moment you hang up.
           </p>
         </Reveal>
@@ -155,7 +155,7 @@ export default function HowItWorks() {
               <span className="h-3 w-3 rounded-full bg-[#f4d7a3]" />
               <span className="h-3 w-3 rounded-full bg-[#b7e3c4]" />
               <span className="ml-3 rounded-md bg-surface px-2.5 py-1 text-[.7rem] font-semibold tracking-wide text-muted">
-                cloudtutor · {steps[active].tag}
+                bumblenote · {steps[active].tag}
               </span>
             </div>
 
@@ -190,7 +190,7 @@ function SceneRecord({ playing }: { playing: boolean }) {
       <div className="ct-rise w-full max-w-[320px] rounded-[20px] border border-line bg-white p-5 shadow-soft-md">
         <div className="mb-4 flex items-center gap-2 text-[.72rem] font-bold uppercase tracking-widest text-muted">
           <span className="grid h-6 w-6 place-items-center rounded-md bg-brand text-white">☁</span>
-          CloudTutor
+          BumbleNote
         </div>
 
         <div className="mb-1 text-[.72rem] font-semibold uppercase tracking-wide text-muted">

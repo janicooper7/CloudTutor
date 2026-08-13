@@ -1,6 +1,6 @@
-# CloudTutor Capture
+# BumbleNote Capture
 
-A Chrome (MV3) extension that records a 1-on-1 lesson and uploads it to CloudTutor,
+A Chrome (MV3) extension that records a 1-on-1 lesson and uploads it to BumbleNote,
 which transcribes it and drafts the lesson automatically.
 
 It records **tab audio (the student)** and **the tutor's microphone** as two separate
@@ -23,11 +23,11 @@ Cambly, Teams (web), etc.
 1. Go to `chrome://extensions`.
 2. Turn on **Developer mode** (top right).
 3. Click **Load unpacked** and select this `extension/` folder.
-4. Pin the **CloudTutor Capture** icon to your toolbar.
+4. Pin the **BumbleNote Capture** icon to your toolbar.
 
 ## Connect it to your account
 
-1. In CloudTutor, open **Settings → Lesson capture**.
+1. In BumbleNote, open **Settings → Lesson capture**.
 2. Copy the **App URL** (e.g. `http://localhost:3000`) and generate a **capture token**.
 3. Open the extension, paste both into the connection screen, and **Save & connect**.
 
@@ -40,7 +40,7 @@ regenerate it any time from Settings (which immediately invalidates the old one)
 2. Click the extension icon, pick the **student**, and hit **Start recording**.
 3. Grant **microphone** permission when prompted (first time only).
 4. When the lesson ends, click **Stop & upload**.
-5. The two tracks upload; CloudTutor transcribes them, generates the feedback, and
+5. The two tracks upload; BumbleNote transcribes them, generates the feedback, and
    creates a **draft lesson**. The popup shows a link to open it, and it also appears in
    your dashboard review queue.
 

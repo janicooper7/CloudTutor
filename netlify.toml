@@ -1,4 +1,4 @@
-# Netlify deployment config for CloudTutor (Next.js 16 app + one background function).
+# Netlify deployment config for BumbleNote (Next.js 16 app + one background function).
 #
 # The heavy audio pipeline can't run inside a normal serverless request (6 MB body
 # limit, 26–60 s timeout), so lesson audio is chunk-uploaded to Netlify Blobs and

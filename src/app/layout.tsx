@@ -16,9 +16,9 @@ const hanken = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "CloudTutor — AI notes for online language tutors",
+  title: "BumbleNote — AI notes for online language tutors",
   description:
-    "CloudTutor listens to your 1-on-1 English lessons on Zoom and Google Meet, then writes the feedback for you — vocabulary, practice areas, and a progress journey for every student.",
+    "BumbleNote listens to your 1-on-1 English lessons on Zoom and Google Meet, then writes the feedback for you — vocabulary, practice areas, and a progress journey for every student.",
 };
 
 export default function RootLayout({

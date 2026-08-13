@@ -7,7 +7,7 @@ export default function SiteFooter() {
         <a href="#" className="flex items-center gap-2.5">
           <Logo size={28} />
           <span className="font-display text-[1.2rem] font-semibold tracking-tight text-ink">
-            CloudTutor
+            BumbleNote
           </span>
         </a>
         <div className="flex gap-6 text-[.95rem]">
@@ -16,7 +16,7 @@ export default function SiteFooter() {
           <a href="#" className="transition-colors hover:text-ink">Privacy</a>
           <a href="#" className="transition-colors hover:text-ink">Contact</a>
         </div>
-        <div className="text-[.9rem]">© 2026 CloudTutor</div>
+        <div className="text-[.9rem]">© 2026 BumbleNote</div>
       </div>
     </footer>
   );

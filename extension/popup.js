@@ -1,4 +1,4 @@
-// Popup: connect to CloudTutor, pick a student, record, and upload.
+// Popup: connect to BumbleNote, pick a student, record, and upload.
 
 const $ = (id) => document.getElementById(id);
 const configView = $("configView");
@@ -155,7 +155,7 @@ async function applyState() {
   } else if (captureStatus === "done" && lastResult?.ok) {
     setDot("ok");
     label.textContent = "Lesson ready";
-    result.innerHTML = `✅ Draft created. <a href="${lastResult.url}" target="_blank" rel="noreferrer">Open in CloudTutor →</a>`;
+    result.innerHTML = `✅ Draft created. <a href="${lastResult.url}" target="_blank" rel="noreferrer">Open in BumbleNote →</a>`;
     result.classList.add("show");
   } else {
     setDot("");
@@ -175,7 +175,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 startBtn.addEventListener("click", async () => {
   showErr(err, "");
   if (!studentSel.value) {
-    showErr(err, "Add a student in CloudTutor first.");
+    showErr(err, "Add a student in BumbleNote first.");
     return;
   }
   startBtn.disabled = true;
