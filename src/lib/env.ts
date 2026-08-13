@@ -30,6 +30,12 @@ export const env = {
   get INTERNAL_TASK_SECRET() {
     return required("INTERNAL_TASK_SECRET");
   },
+  // Shared password for the pre-launch site gate (src/lib/site-gate.ts). This
+  // one is deliberately optional: unset means the gate is off and the site is
+  // public, which is the safe failure mode for a live site.
+  get SITE_PASSWORD() {
+    return process.env.SITE_PASSWORD ?? "";
+  },
   // The From address for lesson-report emails. Resend's shared sandbox address
   // works for testing (only delivers to your own account email); set a verified
   // domain sender for real students.

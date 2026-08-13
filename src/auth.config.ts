@@ -12,7 +12,10 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
-    // Runs in middleware to gate protected routes.
+    // Kept as the declarative statement of which routes need a session, and
+    // still used anywhere `auth` runs without its own handler. src/proxy.ts
+    // passes a handler (for the site gate), which makes NextAuth ignore this
+    // callback's boolean — the /dashboard redirect is enforced there instead.
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isDashboard = nextUrl.pathname.startsWith("/dashboard");
