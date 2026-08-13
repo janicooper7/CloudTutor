@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Avatar from "./Avatar";
 import StatusBadge from "./StatusBadge";
 import type { Session, SessionStatus, Student, VocabItem } from "@/lib/mock";
+import type { SessionFeedbackInput } from "@/app/actions/sessions";
 import { deleteSession, saveSessionFeedback, sendLessonReport } from "@/app/actions/sessions";
+
+/** The editable slice of a session, in a stable key order so two snapshots of it
+ *  can be compared with a plain string equality check (see `dirty` below). */
+function feedbackOf(s: Session): SessionFeedbackInput {
+  return {
+    vocab: s.vocab,
+    wentWell: s.wentWell,
+    focus: s.focus,
+    homework: s.homework,
+    additionalInfo: s.additionalInfo,
+    nextLesson: s.nextLesson,
+    lessonEndedAt: s.lessonEndedAt,
+    tutorNotes: s.tutorNotes,
+  };
+}
 
 export default function SessionReview({
   session,
@@ -32,6 +48,11 @@ export default function SessionReview({
   const [pending, setPending] = useState<null | SessionStatus>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  // Serialized copy of what's actually in the database, so we can tell whether
+  // the tutor has edits they haven't saved yet.
+  const [savedSnapshot, setSavedSnapshot] = useState(() =>
+    JSON.stringify(feedbackOf(session)),
+  );
 
   const title = session.title;
   const sent = status === "sent";
@@ -44,7 +65,7 @@ export default function SessionReview({
     setTimeout(() => setSaved(null), tone === "err" ? 5000 : 2200);
   }
 
-  const feedback = () => ({
+  const feedback = (): SessionFeedbackInput => ({
     vocab,
     wentWell,
     focus,
@@ -55,25 +76,50 @@ export default function SessionReview({
     tutorNotes: notes,
   });
 
+  // True while the on-screen edits differ from what's stored. Drives the
+  // "Unsaved changes" hint and the leave-the-page guards below.
+  const dirty = !sent && JSON.stringify(feedback()) !== savedSnapshot;
+
+  // Guard a browser refresh / tab close. This is the exact hole that lost a
+  // tutor's vocab edits: the edits live in component state until a save button
+  // is pressed, and nothing warned before the page was reloaded.
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+
   async function save(target: SessionStatus) {
+    const wasConfirmed = confirmed;
     setSaving(true);
     setPending(target);
+    // Snapshot exactly what we're sending, so late keystrokes during the
+    // round-trip stay marked as unsaved rather than being wrongly cleared.
+    const payload = feedback();
+    const serialized = JSON.stringify(payload);
     try {
       if (target === "sent") {
-        const result = await sendLessonReport(session.id, feedback());
+        const result = await sendLessonReport(session.id, payload);
+        // A failed send still persisted the edits as "confirmed" server-side,
+        // so record that here instead of leaving the tutor thinking their
+        // edits were lost along with the delivery.
+        setSavedSnapshot(serialized);
+        setStatus("confirmed");
         if (!result.ok) {
           flash(result.error, "err");
           return;
         }
       } else {
-        await saveSessionFeedback(session.id, feedback(), target);
+        await saveSessionFeedback(session.id, payload, target);
+        setSavedSnapshot(serialized);
       }
       setStatus(target);
       if (target === "sent") {
         flash(`Feedback PDF sent to ${session.studentName.split(" ")[0]}.`);
         if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (target === "confirmed") {
-        flash("Lesson confirmed — ready to send.");
+        flash(wasConfirmed ? "Changes saved." : "Lesson confirmed — ready to send.");
       } else {
         flash("Draft saved.");
       }
@@ -107,7 +153,17 @@ export default function SessionReview({
 
   return (
     <div className="px-6 py-8 lg:px-10">
-      <Link href="/dashboard" className="text-sm font-medium text-brand-deep hover:underline">
+      <Link
+        href="/dashboard"
+        onClick={(e) => {
+          // beforeunload doesn't fire on client-side navigation, so guard the
+          // in-app route change too.
+          if (dirty && !window.confirm("You have unsaved changes. Leave without saving?")) {
+            e.preventDefault();
+          }
+        }}
+        className="text-sm font-medium text-brand-deep hover:underline"
+      >
         ← Back to overview
       </Link>
 
@@ -338,15 +394,21 @@ export default function SessionReview({
             flashTone === "err" ? "text-[#d9534f]" : "text-mint"
           }`}
         >
-          {saved}
+          {saved ?? (dirty ? <span className="text-[#b5791f]">Unsaved changes</span> : null)}
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
+          {/* Saves in place: a confirmed lesson stays confirmed, so editing after
+              confirming doesn't force the tutor to demote it back to a draft. */}
           <button
-            onClick={() => save("draft")}
+            onClick={() => save(confirmed ? "confirmed" : "draft")}
             disabled={sent || saving}
             className="rounded-xl border border-brand-line bg-white/70 px-5 py-3 font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-brand disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {pending === "draft" ? "Saving…" : "Save draft"}
+            {saving && (pending === "draft" || (pending === "confirmed" && confirmed))
+              ? "Saving…"
+              : confirmed
+                ? "Save changes"
+                : "Save draft"}
           </button>
           <button
             onClick={() => save("confirmed")}

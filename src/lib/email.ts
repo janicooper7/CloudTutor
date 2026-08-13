@@ -64,8 +64,30 @@ export async function sendLessonReportEmail(args: {
   });
 
   if (error) {
-    throw new Error(`Couldn't send the email: ${error.message ?? "unknown error"}`);
+    throw new Error(explainSendError(error.message));
   }
+}
+
+/**
+ * Turn Resend's API errors into something a tutor can act on.
+ *
+ * The big one: with the default sandbox sender (onboarding@resend.dev) Resend
+ * only delivers to the email on the Resend *account* — every other student is
+ * rejected with a 403 whose message quotes that account address. Passing it
+ * through verbatim both confused tutors and leaked the account owner's email,
+ * so it's replaced with a message about the actual fix (verify a domain and set
+ * EMAIL_FROM). See .env.example → "Email (Resend)".
+ */
+function explainSendError(message: string | undefined): string {
+  const raw = message ?? "unknown error";
+  if (/only send testing emails to your own email address/i.test(raw)) {
+    return (
+      "Email delivery is still in Resend's test mode, which can only send to the " +
+      "Resend account owner. Verify a domain at resend.com/domains and set the " +
+      "EMAIL_FROM environment variable to an address on it."
+    );
+  }
+  return `Couldn't send the email: ${raw}`;
 }
 
 function escapeHtml(s: string): string {
