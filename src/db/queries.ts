@@ -108,7 +108,20 @@ export async function getStudents(): Promise<Student[]> {
 }
 
 export async function getStudentById(id: string): Promise<Student | undefined> {
-  const tutorId = await currentTutorId();
+  return getStudentByIdForTutor(await currentTutorId(), id);
+}
+
+/**
+ * Same lookup, but for a tutor named explicitly rather than taken from the
+ * session. Only for code that legitimately acts on another tenant's behalf —
+ * the operator recovery route (/api/admin/recover), which resolves a failed
+ * job's student for display. Everything request-scoped must use
+ * getStudentById() so the tenant can't be spoofed by a caller-supplied id.
+ */
+export async function getStudentByIdForTutor(
+  tutorId: string,
+  id: string,
+): Promise<Student | undefined> {
   const [row] = await db
     .select()
     .from(students)

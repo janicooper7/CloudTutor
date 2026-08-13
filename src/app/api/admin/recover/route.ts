@@ -9,14 +9,17 @@
 //   GET  /api/admin/recover   → list failed jobs and whether their audio survives
 //   POST /api/admin/recover?uploadId=... → re-fire the worker for that upload
 //
-// Auth: any signed-in tutor (session cookie). The regenerated draft is always
-// created under the JOB's tutorId (createDraftLessonCore), so it lands in the
-// correct tutor's review queue regardless of who triggers the recovery.
+// Auth: operators only — an email on the ADMIN_EMAILS allowlist (see
+// src/lib/admin.ts). Both handlers are inherently cross-tenant (the listing spans
+// every tutor's jobs and exposes their students' names), so gating on "any signed-in
+// tutor" would hand every future signup a window into everyone else's data. The
+// regenerated draft is always created under the JOB's tutorId
+// (createDraftLessonCore), so it lands in the correct tutor's review queue.
 
 import type { NextRequest } from "next/server";
 import { env } from "@/lib/env";
-import { resolveTutorId } from "@/lib/upload-auth";
-import { getStudentById } from "@/db/queries";
+import { currentAdminEmail } from "@/lib/admin";
+import { getStudentByIdForTutor } from "@/db/queries";
 import {
   uploadStore,
   jobKey,
@@ -47,9 +50,8 @@ async function audioPresent(
 }
 
 /** GET — list jobs that failed (or are stuck processing) and whether audio survives. */
-export async function GET(req: NextRequest): Promise<Response> {
-  const tutorId = await resolveTutorId(req);
-  if (!tutorId) return json({ error: "Sign in first." }, 401);
+export async function GET(): Promise<Response> {
+  if (!(await currentAdminEmail())) return json({ error: "Not found." }, 404);
 
   const store = uploadStore();
   const { blobs } = await store.list();
@@ -80,7 +82,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     const present = status.state === "done" ? false : await audioPresent(store, uploadId, job.parts);
     let studentName = job.studentId;
     try {
-      const student = await getStudentById(job.studentId);
+      const student = await getStudentByIdForTutor(job.tutorId, job.studentId);
       if (student) studentName = student.name;
     } catch {
       // best-effort display only
@@ -105,8 +107,7 @@ export async function GET(req: NextRequest): Promise<Response> {
 
 /** POST ?uploadId=... — reset the job to processing and re-fire the background worker. */
 export async function POST(req: NextRequest): Promise<Response> {
-  const tutorId = await resolveTutorId(req);
-  if (!tutorId) return json({ error: "Sign in first." }, 401);
+  if (!(await currentAdminEmail())) return json({ error: "Not found." }, 404);
 
   const uploadId = req.nextUrl.searchParams.get("uploadId")?.trim();
   if (!uploadId) return json({ error: "Missing uploadId." }, 400);
