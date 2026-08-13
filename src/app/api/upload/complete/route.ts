@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { students } from "@/db/schema";
 import { env } from "@/lib/env";
 import { resolveTutorId } from "@/lib/upload-auth";
+import { assertLessonQuota, isQuotaError } from "@/lib/quota";
 import {
   uploadStore,
   jobKey,
@@ -71,6 +72,14 @@ export async function POST(req: NextRequest): Promise<Response> {
     .where(and(eq(students.tutorId, tutorId), eq(students.id, studentId)))
     .limit(1);
   if (!studentRow) return json({ error: "Student not found." }, 404);
+
+  // Last gate before the worker starts spending on Deepgram + Anthropic.
+  try {
+    await assertLessonQuota(tutorId);
+  } catch (err) {
+    if (isQuotaError(err)) return json({ error: err.message, quota: true }, 402);
+    throw err;
+  }
 
   const store = uploadStore();
   const job: UploadJob = {

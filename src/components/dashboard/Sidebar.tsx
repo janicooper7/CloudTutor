@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "../Logo";
 import { GridIcon, UsersIcon, MicIcon, GearIcon } from "./icons";
-import RecordLessonButton from "./RecordLessonButton";
+import RecordLessonButton, { type LessonQuotaView } from "./RecordLessonButton";
 import { signOutAction } from "@/app/actions/auth";
 
 const nav = [
@@ -20,9 +20,11 @@ type PickStudent = { id: string; name: string; initial: string };
 export default function Sidebar({
   user,
   students = [],
+  quota,
 }: {
   user?: SidebarUser;
   students?: PickStudent[];
+  quota: LessonQuotaView;
 }) {
   const pathname = usePathname();
   const displayName = user?.name || user?.email || "Tutor";
@@ -63,7 +65,7 @@ export default function Sidebar({
 
       <div className="mt-auto">
         <div className="mb-4">
-          <RecordLessonButton students={students} />
+          <RecordLessonButton students={students} quota={quota} />
         </div>
 
         <div className="rounded-xl border border-line bg-white/60 p-3">

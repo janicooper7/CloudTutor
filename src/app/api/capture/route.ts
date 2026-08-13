@@ -12,6 +12,7 @@ import { students } from "@/db/schema";
 import { tutorIdByCaptureToken } from "@/lib/capture-auth";
 import { transcribeLesson } from "@/lib/stt";
 import { createDraftLesson } from "@/lib/lessons";
+import { assertLessonQuota, isQuotaError } from "@/lib/quota";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +65,15 @@ export async function POST(req: NextRequest): Promise<Response> {
     .where(and(eq(students.tutorId, tutorId), eq(students.id, studentId)))
     .limit(1);
   if (!studentRow) return json({ error: "Student not found." }, 404);
+
+  // Checked before the audio is read and transcribed — this route pays for STT
+  // and the Claude completion inline.
+  try {
+    await assertLessonQuota(tutorId);
+  } catch (err) {
+    if (isQuotaError(err)) return json({ error: err.message, quota: true }, 402);
+    throw err;
+  }
 
   try {
     const [studentAudio, tutorAudio] = await Promise.all([

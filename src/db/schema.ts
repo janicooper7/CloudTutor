@@ -22,8 +22,10 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type { TalkTime, VocabItem } from "../lib/mock";
+import { PLAN_IDS } from "../lib/plans";
 
 export const sessionStatus = pgEnum("session_status", ["draft", "confirmed", "sent"]);
+export const tutorPlan = pgEnum("tutor_plan", PLAN_IDS);
 export const cefrLevel = pgEnum("cefr_level", ["A1", "A2", "B1", "B2", "C1", "C2"]);
 export const studentTrend = pgEnum("student_trend", ["up", "steady"]);
 
@@ -31,6 +33,11 @@ export const tutors = pgTable("tutors", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
+  // Subscription tier. Governs the monthly lesson quota and student cap enforced
+  // in src/lib/quota.ts. New tutors start on `free`; Stripe will own this column
+  // once billing lands. Tutors that predate the column were grandfathered to
+  // `unlimited` by the migration that added it.
+  plan: tutorPlan("plan").notNull().default("free"),
   // Bearer token the capture browser extension uses to upload lessons.
   captureToken: text("capture_token").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

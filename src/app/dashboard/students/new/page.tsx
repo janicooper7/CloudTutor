@@ -48,7 +48,7 @@ export default function NewStudentPage() {
     setSubmitError(undefined);
     setSaving(true);
     try {
-      const { id } = await createStudent({
+      const result = await createStudent({
         name,
         native: native.trim() || "—",
         email,
@@ -59,7 +59,13 @@ export default function NewStudentPage() {
         focus: splitList(focus),
         notes,
       });
-      setCreated({ id, name: name.trim() });
+      if (!result.ok) {
+        // Expected refusal (e.g. the plan's student cap) — show what it said
+        // rather than the generic retry copy, which wouldn't be true.
+        setSubmitError(result.error);
+        return;
+      }
+      setCreated({ id: result.id, name: name.trim() });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setSubmitError("Couldn't save the student. Please try again.");

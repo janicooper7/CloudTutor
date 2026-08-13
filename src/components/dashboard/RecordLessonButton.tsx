@@ -14,7 +14,22 @@ import { useSessionRecorder, formatElapsed } from "./useSessionRecorder";
 
 type PickStudent = { id: string; name: string; initial: string };
 
-export default function RecordLessonButton({ students }: { students: PickStudent[] }) {
+/** This month's lesson allowance, resolved on the server (src/lib/quota.ts). */
+export type LessonQuotaView = {
+  used: number;
+  limit: number;
+  remaining: number;
+  allowed: boolean;
+  planName: string;
+};
+
+export default function RecordLessonButton({
+  students,
+  quota,
+}: {
+  students: PickStudent[];
+  quota: LessonQuotaView;
+}) {
   const { status, elapsed, error, start, stop, reset } = useSessionRecorder();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [chosen, setChosen] = useState<PickStudent | null>(null);
@@ -68,7 +83,27 @@ export default function RecordLessonButton({ students }: { students: PickStudent
                 </div>
                 <p className="mb-4 text-sm text-ink-soft">Who is this lesson with?</p>
 
-                {students.length === 0 ? (
+                {!quota.allowed ? (
+                  // Caught here rather than after the lesson: /api/upload/complete
+                  // would reject the upload anyway, and finding that out having
+                  // just taught for an hour is the worst possible moment.
+                  <div className="rounded-xl border border-brand-line bg-brand-soft/50 p-4 text-sm text-ink-soft">
+                    <div className="font-semibold text-ink">
+                      You&apos;ve used all {quota.limit} lessons this month
+                    </div>
+                    <p className="mt-1">
+                      The {quota.planName} plan includes {quota.limit} lessons a month. Your
+                      allowance resets on the 1st.
+                    </p>
+                    <Link
+                      href="/#pricing"
+                      onClick={closeIdle}
+                      className="mt-3 block rounded-lg bg-brand-deep px-4 py-2 text-center font-semibold text-white"
+                    >
+                      See plans
+                    </Link>
+                  </div>
+                ) : students.length === 0 ? (
                   <div className="rounded-xl border border-line bg-white/60 p-4 text-sm text-ink-soft">
                     Add a student first, then you can record their lessons.
                     <Link
@@ -112,6 +147,13 @@ export default function RecordLessonButton({ students }: { students: PickStudent
                       </div>
                     )}
                   </>
+                )}
+
+                {/* Only worth the space once the allowance is nearly gone. */}
+                {quota.allowed && quota.remaining <= 3 && (
+                  <p className="mt-3 text-center text-xs text-muted">
+                    {quota.remaining} of {quota.limit} lessons left this month on {quota.planName}.
+                  </p>
                 )}
 
                 <button
