@@ -2,12 +2,11 @@ import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import Hero from "@/components/sections/Hero";
 import PlatformStrip from "@/components/sections/PlatformStrip";
-import TrustBar from "@/components/sections/TrustBar";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Transformation from "@/components/sections/Transformation";
 import FeedbackSplit from "@/components/sections/FeedbackSplit";
 import Journey from "@/components/sections/Journey";
-import Testimonials from "@/components/sections/Testimonials";
+import PrivacyBadge from "@/components/sections/PrivacyBadge";
 import Pricing from "@/components/sections/Pricing";
 import CtaBand from "@/components/sections/CtaBand";
 import SiteFooter from "@/components/sections/SiteFooter";
@@ -25,8 +24,7 @@ export default async function Home() {
         <Transformation />
         <FeedbackSplit />
         <Journey />
-        <TrustBar />
-        <Testimonials />
+        <PrivacyBadge />
         <Pricing />
         <CtaBand />
       </main>
