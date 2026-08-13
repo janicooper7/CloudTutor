@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import BeeFlight from "@/components/BeeFlight";
 import SiteHeader from "@/components/SiteHeader";
 import Hero from "@/components/sections/Hero";
 import PlatformStrip from "@/components/sections/PlatformStrip";
@@ -17,6 +18,7 @@ export default async function Home() {
   return (
     <>
       <SiteHeader user={session?.user} />
+      <BeeFlight />
       <main>
         <Hero />
         <PlatformStrip />
