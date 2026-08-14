@@ -106,11 +106,6 @@ export default async function SettingsPage() {
             </div>
           </div>
 
-          <ComingSoon
-            title="Consent & recording"
-            detail="How students are notified that lessons are analyzed."
-          />
-
           {/* Last on the page, and set apart — the only irreversible control here. */}
           <DeleteAccountCard
             email={tutor.email}
