@@ -5,9 +5,9 @@
 // types from src/lib/mock.ts (null → undefined for optional fields) so callers
 // keep using the same Student/Session shapes the UI already expects.
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "./index";
-import { sessions, students, type DbSession, type DbStudent } from "./schema";
+import { sessions, students, tutors, type DbSession, type DbStudent } from "./schema";
 import { currentTutorId } from "@/auth";
 import type { Session, Student } from "@/lib/mock";
 
@@ -159,6 +159,48 @@ export async function getSessionsForStudent(studentId: string): Promise<Session[
     .where(and(eq(sessions.tutorId, tutorId), eq(sessions.studentId, studentId)))
     .orderBy(desc(sessions.isoDate));
   return rows.map(toSession);
+}
+
+export type TutorProfile = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+};
+
+/**
+ * The signed-in tutor's own row. The DB — not the JWT — is the source of truth
+ * for the display name: the token still carries whatever Google supplied at
+ * sign-in, so anything reading `session.user.name` would keep showing the old
+ * name after an edit here until the token is reissued.
+ */
+export async function getTutor(): Promise<TutorProfile | undefined> {
+  const tutorId = await currentTutorId();
+  const [row] = await db
+    .select({
+      id: tutors.id,
+      name: tutors.name,
+      email: tutors.email,
+      createdAt: tutors.createdAt,
+    })
+    .from(tutors)
+    .where(eq(tutors.id, tutorId))
+    .limit(1);
+  return row;
+}
+
+/**
+ * Lifetime lesson count for the current tutor — all statuses, not the monthly
+ * quota window (that's lessonUsage() in src/lib/quota.ts). Used to tell the
+ * tutor exactly what deleting their account would take with it.
+ */
+export async function getLessonTotal(): Promise<number> {
+  const tutorId = await currentTutorId();
+  const [row] = await db
+    .select({ n: count() })
+    .from(sessions)
+    .where(eq(sessions.tutorId, tutorId));
+  return row?.n ?? 0;
 }
 
 export async function getSessionById(id: string): Promise<Session | undefined> {

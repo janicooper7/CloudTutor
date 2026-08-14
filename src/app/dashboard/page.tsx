@@ -1,10 +1,9 @@
 import Link from "next/link";
 import Topbar from "@/components/dashboard/Topbar";
-import StatusBadge from "@/components/dashboard/StatusBadge";
 import Avatar from "@/components/dashboard/Avatar";
-import { ArrowUpIcon, ChevronRightIcon } from "@/components/dashboard/icons";
-import { auth } from "@/auth";
-import { getPendingSessions, getSessions, getStudents } from "@/db/queries";
+import PendingQueue from "@/components/dashboard/PendingQueue";
+import { ArrowUpIcon } from "@/components/dashboard/icons";
+import { getPendingSessions, getSessions, getStudents, getTutor } from "@/db/queries";
 
 // Monday 00:00 of the week containing `d`.
 function startOfWeek(d: Date): Date {
@@ -18,18 +17,21 @@ function startOfWeek(d: Date): Date {
 type StatTone = "up" | "down" | "muted";
 
 export default async function DashboardHome() {
-  const [session, pending, students, sessions] = await Promise.all([
-    auth(),
+  const [tutor, pending, students, sessions] = await Promise.all([
+    getTutor(),
     getPendingSessions(),
     getStudents(),
     getSessions(),
   ]);
 
-  const firstName = session?.user?.name?.split(" ")[0] ?? "there";
+  // The tutor row, not the JWT — the name is editable in Settings.
+  const firstName = tutor?.name.trim().split(/\s+/)[0] || "there";
   const activeCount = students.filter((s) => s.active !== false).length;
   // Only drafts still "need review" — a confirmed lesson has been reviewed and
   // is just awaiting send, so it stays in the list but isn't counted as a draft.
   const draftCount = pending.filter((s) => s.status === "draft").length;
+  // Reviewed already, but the report hasn't gone out to the student yet.
+  const confirmedCount = pending.filter((s) => s.status === "confirmed").length;
 
   // Real lessons-per-week from session dates, plus a week-over-week trend.
   const thisWeekStart = startOfWeek(new Date());
@@ -51,6 +53,7 @@ export default async function DashboardHome() {
     { label: "Active students", value: String(activeCount), delta: "on your roster", tone: "muted" },
     { label: "Lessons this week", value: String(thisWeek), delta: weekDelta, tone: weekTone },
     { label: "Drafts to review", value: String(draftCount), delta: "Awaiting you", tone: "muted" },
+    { label: "Ready to send to student", value: String(confirmedCount), delta: "Not sent yet", tone: "muted" },
   ];
 
   return (
@@ -59,7 +62,7 @@ export default async function DashboardHome() {
 
       <div className="px-6 py-8 lg:px-10">
         {/* stats */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((s) => (
             <div
               key={s.label}
@@ -86,10 +89,13 @@ export default async function DashboardHome() {
           {/* review queue */}
           <section className="rounded-2xl border border-line bg-surface p-6 shadow-soft-sm">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-display text-xl font-medium text-ink">Awaiting your review</h2>
-              <span className="rounded-full bg-danger/12 px-2.5 py-1 text-xs font-semibold text-danger-deep">
-                {draftCount} {draftCount === 1 ? "draft" : "drafts"}
-              </span>
+              <h2 className="font-display text-xl font-medium text-ink">Awaiting you</h2>
+              <Link
+                href="/dashboard/lessons"
+                className="text-sm font-semibold text-brand-deep hover:underline"
+              >
+                All lessons
+              </Link>
             </div>
 
             {pending.length === 0 ? (
@@ -101,24 +107,7 @@ export default async function DashboardHome() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
-                {pending.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/dashboard/sessions/${s.id}`}
-                    className="group flex items-center gap-4 rounded-xl border border-line bg-white/60 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-line hover:shadow-soft-sm"
-                  >
-                    <Avatar initial={s.studentInitial} size={46} />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-semibold text-ink">{s.studentName}</div>
-                      <div className="truncate text-sm text-ink-soft">{s.title}</div>
-                      <div className="mt-1 text-xs text-muted">{s.date} · {s.durationMin} min</div>
-                    </div>
-                    <StatusBadge status={s.status} />
-                    <ChevronRightIcon className="text-muted transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-deep" />
-                  </Link>
-                ))}
-              </div>
+              <PendingQueue sessions={pending} />
             )}
           </section>
 

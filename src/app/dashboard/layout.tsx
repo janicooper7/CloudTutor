@@ -1,6 +1,6 @@
 import { auth, currentTutorId } from "@/auth";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { getStudents } from "@/db/queries";
+import { getStudents, getTutor } from "@/db/queries";
 import { lessonUsage } from "@/lib/quota";
 
 export default async function DashboardLayout({
@@ -9,7 +9,11 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [session, tutorId] = await Promise.all([auth(), currentTutorId()]);
-  const [allStudents, usage] = await Promise.all([getStudents(), lessonUsage(tutorId)]);
+  const [allStudents, usage, tutor] = await Promise.all([
+    getStudents(),
+    lessonUsage(tutorId),
+    getTutor(),
+  ]);
 
   const students = allStudents
     .filter((s) => s.active !== false)
@@ -24,9 +28,16 @@ export default async function DashboardLayout({
     planName: usage.plan.name,
   };
 
+  // Prefer the tutor row over the JWT: the token keeps whatever name Google
+  // supplied at sign-in, so a rename in Settings wouldn't show here until the
+  // token was reissued.
+  const user = tutor
+    ? { name: tutor.name, email: tutor.email }
+    : session?.user ?? null;
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar user={session?.user ?? null} students={students} quota={quota} />
+      <Sidebar user={user} students={students} quota={quota} />
       <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
