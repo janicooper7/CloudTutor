@@ -5,7 +5,7 @@
 
 import type { NextRequest } from "next/server";
 import { resolveTutorId } from "@/lib/upload-auth";
-import { uploadStore, chunkKey, type Track } from "@/lib/upload-store";
+import { uploadStore, chunkKey, type ChunkMetadata, type Track } from "@/lib/upload-store";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -42,6 +42,10 @@ export async function POST(req: NextRequest): Promise<Response> {
   const body = await req.arrayBuffer();
   if (body.byteLength === 0) return json({ error: "Empty chunk." }, 400);
 
-  await uploadStore().set(chunkKey(uploadId, track, part), body);
+  // Stamp the write time: if the client never calls /complete, this chunk is all
+  // the sweep has to age the abandoned upload by. See src/lib/upload-retention.
+  await uploadStore().set(chunkKey(uploadId, track, part), body, {
+    metadata: { at: Date.now() } satisfies ChunkMetadata,
+  });
   return json({ ok: true });
 }

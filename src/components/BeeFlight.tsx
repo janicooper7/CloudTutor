@@ -26,10 +26,10 @@ type Bee = {
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
 // Cadence. The first bee waits for the hero to settle; after that it's roughly
-// one visit every half-minute — sparse enough to stay a surprise rather than
-// something the eye starts tracking while reading.
-const FIRST: [number, number] = [7_000, 15_000];
-const GAP: [number, number] = [26_000, 55_000];
+// one visit every ten seconds. Crossings run 15-23s, so passes overlap and the
+// sky is rarely empty without the page turning into a swarm.
+const FIRST: [number, number] = [3_000, 6_000];
+const GAP: [number, number] = [7_000, 15_000];
 const HIDDEN_RETRY = 5_000;
 
 export default function BeeFlight() {
@@ -52,7 +52,7 @@ export default function BeeFlight() {
 
       // Usually one bee; now and then a pair, the second trailing behind.
       const batch: Bee[] = [];
-      const count = Math.random() < 0.32 ? 2 : 1;
+      const count = Math.random() < 0.4 ? 2 : 1;
       const rtl = Math.random() < 0.5;
       const top = rand(12, 76);
 

@@ -45,7 +45,34 @@ export const STALL_AFTER_MS = 13 * 60 * 1000;
 export type UploadStatus =
   | { state: "processing" }
   | { state: "done"; lessonId: string }
-  | { state: "error"; error: string };
+  | {
+      state: "error";
+      error: string;
+      /**
+       * Epoch ms the job failed. Starts the retention clock on the audio a failed
+       * job leaves behind — see AUDIO_RETENTION_MS. Optional so statuses written
+       * before this field existed still parse; the sweep treats a missing value
+       * as already expired, which is the privacy-safe reading.
+       */
+      failedAt?: number;
+    };
+
+/**
+ * How long lesson audio may outlive the job that was meant to consume it.
+ *
+ * The happy path deletes audio the moment the notes exist (see the worker), so
+ * this only governs the leftovers: jobs that failed, and uploads the client
+ * abandoned before calling /complete. Both are kept briefly so a lesson can be
+ * re-run rather than lost — /api/admin/recover depends on it — and then deleted
+ * automatically by netlify/functions/purge-uploads.
+ *
+ * This window is a published promise in the privacy policy (src/app/privacy).
+ * Changing it here means changing it there.
+ */
+export const AUDIO_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Metadata stamped on every chunk so the sweep can age out abandoned uploads. */
+export type ChunkMetadata = { at?: number };
 
 export function uploadStore() {
   return getStore(UPLOAD_STORE);
@@ -67,8 +94,11 @@ export function statusKey(uploadId: string): string {
  * The labelled transcript, cached after speech-to-text succeeds. Transcription is
  * the expensive, deterministic half of the pipeline; the drafting step after it is
  * the one that fails. Caching lets a retry skip Deepgram entirely instead of
- * re-billing both tracks. Deleted alongside the audio on success — see the
- * "audio is transient" rule in PLAN.md §9.
+ * re-billing both tracks. Deleted alongside the audio on success, and swept with
+ * it on failure — see the "audio is transient" rule in PLAN.md §9.
+ *
+ * Counts as lesson content for retention purposes: it is a verbatim record of what
+ * was said, so it lives and dies with the audio, never longer.
  */
 export function transcriptKey(uploadId: string): string {
   return `${uploadId}/transcript`;

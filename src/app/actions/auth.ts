@@ -1,6 +1,19 @@
 "use server";
 
+import { AuthError } from "next-auth";
+import { eq, sql } from "drizzle-orm";
 import { signIn, signOut } from "@/auth";
+import { db } from "@/db";
+import { tutors } from "@/db/schema";
+import { appOrigin } from "@/lib/app-url";
+import { sendPasswordResetEmail, sendPasswordResetGoogleEmail } from "@/lib/email";
+import { hashPassword } from "@/lib/password";
+import { passwordProblem } from "@/lib/password-policy";
+import {
+  consumeResetToken,
+  issueResetToken,
+  RESET_TTL_MINUTES,
+} from "@/lib/reset-tokens";
 
 export async function signInWithGoogle() {
   await signIn("google", { redirectTo: "/dashboard" });
@@ -8,4 +21,240 @@ export async function signInWithGoogle() {
 
 export async function signOutAction() {
   await signOut({ redirectTo: "/" });
+}
+
+/**
+ * What the auth forms hand back to `useActionState`. `errors` is keyed by field
+ * name so each input can show its own message; `formError` covers everything
+ * that isn't about one field. `values` echoes the non-secret inputs back so a
+ * rejected submit doesn't wipe what the tutor typed.
+ */
+export type AuthFormState = {
+  errors?: Partial<
+    Record<"firstName" | "lastName" | "email" | "password" | "confirm", string>
+  >;
+  formError?: string;
+  values?: { firstName?: string; lastName?: string; email?: string };
+  /** Set once a reset email has gone out, so the form can swap to a receipt. */
+  sent?: boolean;
+};
+
+// Deliberately permissive: the only thing worth rejecting here is input that
+// clearly isn't an address. Deliverability is proven by mail actually arriving.
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const field = (data: FormData, name: string) => String(data.get(name) ?? "").trim();
+
+/**
+ * Create a tutor from name/surname/email/password, then sign them straight in.
+ *
+ * On success this never returns — `signIn` redirects to the dashboard. The
+ * redirect travels as a thrown control-flow signal, so the catch below has to
+ * rethrow anything that isn't an AuthError.
+ */
+export async function signUpWithPassword(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const firstName = field(formData, "firstName");
+  const lastName = field(formData, "lastName");
+  const email = field(formData, "email").toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const values = { firstName, lastName, email };
+
+  const errors: AuthFormState["errors"] = {};
+  if (!firstName) errors.firstName = "Tell us your first name.";
+  if (!lastName) errors.lastName = "Tell us your last name.";
+  if (!EMAIL.test(email)) errors.email = "That doesn't look like an email address.";
+  const pwProblem = passwordProblem(password);
+  if (pwProblem) errors.password = pwProblem;
+  if (Object.keys(errors).length) return { errors, values };
+
+  // Emails are stored lowercase by this flow, but Google rows predate that and
+  // may carry mixed case — compare case-insensitively so the two flows can't
+  // create two accounts for the same person.
+  const [existing] = await db
+    .select({ hasPassword: sql<boolean>`${tutors.passwordHash} is not null` })
+    .from(tutors)
+    .where(sql`lower(${tutors.email}) = ${email}`)
+    .limit(1);
+
+  if (existing) {
+    return {
+      values,
+      errors: {
+        email: existing.hasPassword
+          ? "There's already an account with this email — log in instead."
+          : "This email is already signed up with Google. Use “Continue with Google”.",
+      },
+    };
+  }
+
+  try {
+    await db.insert(tutors).values({
+      email,
+      name: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
+      passwordHash: await hashPassword(password),
+    });
+  } catch {
+    // Almost certainly the unique index on email losing a race with a parallel
+    // signup; anything else here is a DB fault we can't usefully explain.
+    return {
+      values,
+      errors: { email: "We couldn't create that account. Try logging in instead." },
+    };
+  }
+
+  try {
+    await signIn("credentials", { email, password, redirectTo: "/dashboard" });
+  } catch (error) {
+    // The tutor exists at this point, so send them to the login form rather
+    // than leaving them on a signup that looks like it failed outright.
+    if (error instanceof AuthError) {
+      return { values, formError: "Your account is ready — log in to continue." };
+    }
+    throw error; // redirect signal, or a genuine fault
+  }
+
+  return {}; // unreachable — signIn redirects
+}
+
+/** Sign in an existing tutor with their email and password. */
+export async function logInWithPassword(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const email = field(formData, "email").toLowerCase();
+  const password = String(formData.get("password") ?? "");
+
+  if (!email || !password) {
+    return {
+      values: { email },
+      formError: "Enter your email and password.",
+    };
+  }
+
+  try {
+    await signIn("credentials", { email, password, redirectTo: "/dashboard" });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      // Same message for every failure — see InvalidLogin in src/auth.ts.
+      return {
+        values: { email },
+        formError:
+          "That email and password don't match an account. If you signed up with Google, use the button above.",
+      };
+    }
+    throw error; // redirect signal, or a genuine fault
+  }
+
+  return {};
+}
+
+/**
+ * Step 1 of the reset: email a single-use link.
+ *
+ * The reply is identical whether or not the address has an account, so the form
+ * can't be used to work out who's registered. That means the interesting cases
+ * — no account, a Google-only account, a throttled repeat request — are all
+ * settled in the mailbox rather than on screen.
+ */
+export async function requestPasswordReset(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const email = field(formData, "email").toLowerCase();
+  if (!EMAIL.test(email)) {
+    return { values: { email }, errors: { email: "Enter the email you signed up with." } };
+  }
+
+  const [tutor] = await db
+    .select({ id: tutors.id, email: tutors.email, name: tutors.name, hash: tutors.passwordHash })
+    .from(tutors)
+    .where(sql`lower(${tutors.email}) = ${email}`)
+    .limit(1);
+
+  if (tutor) {
+    const origin = await appOrigin();
+    try {
+      if (!tutor.hash) {
+        await sendPasswordResetGoogleEmail({
+          to: tutor.email,
+          name: tutor.name,
+          loginUrl: `${origin}/login`,
+        });
+      } else {
+        const token = await issueResetToken(tutor.id);
+        // null means one went out seconds ago; the earlier link is still valid.
+        if (token) {
+          await sendPasswordResetEmail({
+            to: tutor.email,
+            name: tutor.name,
+            url: `${origin}/reset?token=${encodeURIComponent(token)}`,
+            ttlMinutes: RESET_TTL_MINUTES,
+          });
+        }
+      }
+    } catch (error) {
+      // A send failure is ours, not theirs, and it's the one case worth showing
+      // — silently claiming success would leave them waiting on mail that is
+      // never coming.
+      console.error("password reset email failed", error);
+      return {
+        values: { email },
+        formError: "We couldn't send that email just now. Try again in a minute.",
+      };
+    }
+  }
+
+  return { sent: true, values: { email } };
+}
+
+/**
+ * Step 2: spend the token, set the new password, and sign them in.
+ *
+ * Spending the token before hashing is deliberate — it closes the window where
+ * two submissions of the same link could both succeed.
+ */
+export async function resetPassword(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const token = field(formData, "token");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  const problem = passwordProblem(password);
+  if (problem) return { errors: { password: problem } };
+  if (password !== confirm) return { errors: { confirm: "Those don't match." } };
+
+  const tutorId = await consumeResetToken(token);
+  if (!tutorId) {
+    return {
+      formError:
+        "That reset link has expired or already been used. Request a new one below.",
+    };
+  }
+
+  const [tutor] = await db
+    .update(tutors)
+    .set({ passwordHash: await hashPassword(password) })
+    .where(eq(tutors.id, tutorId))
+    .returning({ email: tutors.email });
+
+  if (!tutor) return { formError: "We couldn't update that account. Try again." };
+
+  try {
+    await signIn("credentials", { email: tutor.email, password, redirectTo: "/dashboard" });
+  } catch (error) {
+    // The password is already changed, so this is only about the auto-login.
+    if (error instanceof AuthError) {
+      return { formError: "Your password is updated — log in with it to continue." };
+    }
+    throw error; // redirect signal, or a genuine fault
+  }
+
+  return {}; // unreachable — signIn redirects
 }

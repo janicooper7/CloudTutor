@@ -32,7 +32,15 @@ export const studentTrend = pgEnum("student_trend", ["up", "steady"]);
 export const tutors = pgTable("tutors", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: text("email").notNull().unique(),
+  // Display name — always populated. For email/password signups it's
+  // "<firstName> <lastName>"; for Google it's whatever the profile carries.
   name: text("name").notNull(),
+  // Only the email/password flow collects these separately; Google accounts and
+  // rows that predate the column leave them null and rely on `name`.
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  // Null for Google-only accounts. Format is owned by src/lib/password.ts.
+  passwordHash: text("password_hash"),
   // Subscription tier. Governs the monthly lesson quota and student cap enforced
   // in src/lib/quota.ts. New tutors start on `free`; Stripe will own this column
   // once billing lands. Tutors that predate the column were grandfathered to
@@ -97,9 +105,33 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Single-use tokens backing the "forgot password" flow (src/lib/reset-tokens.ts).
+ *
+ * Only the SHA-256 of the token is stored, so a leaked database dump can't be
+ * turned back into working reset links. Rows are kept after use rather than
+ * deleted — `usedAt` is what makes a second click on the same emailed link fail
+ * closed instead of silently minting a fresh session.
+ */
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tutorId: uuid("tutor_id")
+    .notNull()
+    .references(() => tutors.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const tutorsRelations = relations(tutors, ({ many }) => ({
   students: many(students),
   sessions: many(sessions),
+  passwordResetTokens: many(passwordResetTokens),
+}));
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  tutor: one(tutors, { fields: [passwordResetTokens.tutorId], references: [tutors.id] }),
 }));
 
 export const studentsRelations = relations(students, ({ one, many }) => ({

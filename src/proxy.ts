@@ -16,8 +16,21 @@ import { GATE_COOKIE, GATE_PATH, gateEnabled, tokenIsValid } from "@/lib/site-ga
 
 const { auth } = NextAuth(authConfig);
 
+/**
+ * Pages that must stay publicly reachable even while the pre-launch gate is up.
+ *
+ * Google's OAuth verification fetches the privacy policy and terms from the URLs
+ * registered on the consent screen, as an anonymous client with no cookies. Behind
+ * the gate those URLs answer with a redirect to /enter, and verification fails —
+ * so the gate deliberately does not cover them. Neither page reveals anything
+ * about the product that the policy itself doesn't already state.
+ */
+const PUBLIC_PATHS = ["/terms", "/privacy"];
+
 export default auth((request) => {
   const { pathname, search } = request.nextUrl;
+
+  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
   if (gateEnabled() && !tokenIsValid(request.cookies.get(GATE_COOKIE)?.value)) {
     const url = request.nextUrl.clone();

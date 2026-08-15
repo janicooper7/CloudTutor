@@ -68,6 +68,109 @@ export async function sendLessonReportEmail(args: {
   }
 }
 
+/** Shared chrome so the reset emails look like the lesson report above. */
+function shell(heading: string, body: string): string {
+  return `
+  <div style="background:#fffaf0;padding:28px 0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #f0e6d6;">
+      <div style="background:#16233d;padding:24px 28px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#fdb300;">BUMBLENOTE</div>
+        <div style="font-size:20px;font-weight:700;color:#ffffff;margin-top:6px;">${escapeHtml(heading)}</div>
+      </div>
+      <div style="padding:26px 28px;color:#1f2430;">${body}</div>
+      <div style="padding:14px 28px;border-top:1px solid #f2ead9;font-size:12px;color:#8b909a;">
+        Sent with BumbleNote
+      </div>
+    </div>
+  </div>`;
+}
+
+/**
+ * The "forgot password" email, with the single-use link from
+ * src/lib/reset-tokens.ts.
+ *
+ * The URL is spelled out under the button as well: plenty of mail clients strip
+ * or rewrite anchors, and a reset link nobody can click is a support ticket.
+ */
+export async function sendPasswordResetEmail(args: {
+  to: string;
+  name: string;
+  url: string;
+  ttlMinutes: number;
+}): Promise<void> {
+  const { to, name, url, ttlMinutes } = args;
+  const firstName = name.split(" ")[0];
+  const safeUrl = escapeHtml(url);
+
+  const html = shell(
+    "Reset your password",
+    `<p style="margin:0 0 12px;">Hi ${escapeHtml(firstName)},</p>
+     <p style="margin:0 0 20px;color:#3f4750;">
+       Someone asked to reset the password on your BumbleNote account. Click below
+       to choose a new one — the link works once and expires in ${ttlMinutes} minutes.
+     </p>
+     <p style="margin:0 0 20px;">
+       <a href="${safeUrl}" style="display:inline-block;background:#fdb300;color:#1f2430;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:12px;">Choose a new password</a>
+     </p>
+     <p style="margin:0 0 20px;font-size:13px;color:#8b909a;word-break:break-all;">
+       Or paste this into your browser:<br/>${safeUrl}
+     </p>
+     <p style="margin:0;color:#3f4750;">
+       If this wasn't you, ignore this email — your password stays as it is.
+     </p>`,
+  );
+
+  const { error } = await getClient().emails.send({
+    from: env.EMAIL_FROM,
+    to,
+    subject: "Reset your BumbleNote password",
+    html,
+  });
+
+  if (error) throw new Error(explainSendError(error.message));
+}
+
+/**
+ * Sent when a reset is requested for an email that signs in with Google.
+ *
+ * Without this, that tutor gets silence — the /forgot page can't tell them
+ * their account has no password without confirming the address exists to
+ * whoever typed it. Saying it in the mailbox itself only reaches the owner.
+ */
+export async function sendPasswordResetGoogleEmail(args: {
+  to: string;
+  name: string;
+  loginUrl: string;
+}): Promise<void> {
+  const { to, name, loginUrl } = args;
+  const firstName = name.split(" ")[0];
+  const safeUrl = escapeHtml(loginUrl);
+
+  const html = shell(
+    "You sign in with Google",
+    `<p style="margin:0 0 12px;">Hi ${escapeHtml(firstName)},</p>
+     <p style="margin:0 0 20px;color:#3f4750;">
+       Someone asked to reset the password on your BumbleNote account, but there's
+       no password to reset — this account signs in with Google.
+     </p>
+     <p style="margin:0 0 20px;">
+       <a href="${safeUrl}" style="display:inline-block;background:#fdb300;color:#1f2430;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:12px;">Continue with Google</a>
+     </p>
+     <p style="margin:0;color:#3f4750;">
+       If this wasn't you, ignore this email — nothing about your account changed.
+     </p>`,
+  );
+
+  const { error } = await getClient().emails.send({
+    from: env.EMAIL_FROM,
+    to,
+    subject: "Signing in to BumbleNote",
+    html,
+  });
+
+  if (error) throw new Error(explainSendError(error.message));
+}
+
 /**
  * Turn Resend's API errors into something a tutor can act on.
  *

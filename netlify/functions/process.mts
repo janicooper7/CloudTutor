@@ -148,8 +148,15 @@ const handler = async (req: Request): Promise<Response> => {
     const error = err instanceof Error ? err.message : "Processing failed.";
     console.error(`[process] FAILED uploadId=${uploadId}:`, err);
     if (store && uploadId) {
+      // The audio and any cached transcript stay put, so /api/admin/recover can
+      // re-run this lesson instead of the tutor losing it. `failedAt` starts the
+      // clock that eventually deletes them anyway — see src/lib/upload-retention.
       await store
-        .setJSON(statusKey(uploadId), { state: "error", error } satisfies UploadStatus)
+        .setJSON(statusKey(uploadId), {
+          state: "error",
+          error,
+          failedAt: Date.now(),
+        } satisfies UploadStatus)
         .catch((e) => console.error("[process] could not write error status:", e));
     }
   }

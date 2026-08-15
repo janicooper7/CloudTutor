@@ -1,0 +1,26 @@
+// The site's own origin, for links that have to survive leaving the browser
+// (password-reset emails, mainly).
+
+import { headers } from "next/headers";
+
+/**
+ * Absolute origin, e.g. "https://bumblenote.com".
+ *
+ * APP_URL wins when it's set, and it should be set in production. The fallback
+ * reads the Host header, which a request can lie about — that's the classic way
+ * a reset email gets rewritten to point at an attacker's domain. Netlify
+ * overwrites `x-forwarded-host` on the way in, so the fallback is sound there,
+ * but pinning APP_URL removes the question entirely.
+ */
+export async function appOrigin(): Promise<string> {
+  const explicit = process.env.APP_URL?.trim();
+  if (explicit) return explicit.replace(/\/+$/, "");
+
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (!host) throw new Error("Can't resolve the site origin — set APP_URL.");
+
+  const proto =
+    h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}

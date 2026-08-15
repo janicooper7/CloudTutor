@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AuthDivider from "@/components/auth/AuthDivider";
 import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleAuthForm from "@/components/auth/GoogleAuthForm";
+import SignupForm from "@/components/auth/SignupForm";
 
 export const metadata: Metadata = {
   title: "Create your account · BumbleNote",
@@ -16,10 +18,14 @@ export default function SignupPage() {
     >
       <GoogleAuthForm label="Sign up with Google" />
 
+      <AuthDivider label="or sign up with email" />
+
+      <SignupForm />
+
       <p className="mt-6 text-center text-sm text-muted">
-        We&apos;ll set up your account from your Google profile. By continuing you agree to our{" "}
-        <a href="#" className="text-brand-deep hover:underline">Terms</a> and{" "}
-        <a href="#" className="text-brand-deep hover:underline">Privacy Policy</a>.
+        By creating an account you agree to our{" "}
+        <Link href="/terms" className="text-brand-deep hover:underline">Terms</Link> and{" "}
+        <Link href="/privacy" className="text-brand-deep hover:underline">Privacy Policy</Link>.
       </p>
 
       <p className="mt-6 text-center text-ink-soft">
